@@ -6,8 +6,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-// #include "gui/application.h"
+#include "gui/application.h"
 #include <stdio.h>
+#include <iostream>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
@@ -56,7 +57,7 @@ int main(int, char **)
 #endif
 
     // Create window with graphics context
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "DSPC Assignment GUI", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -106,8 +107,8 @@ int main(int, char **)
     //IM_ASSERT(font != NULL);
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
+    bool sqw = false, spw = false;
+    DSPC::Application application = DSPC::Application(sqw, spw);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -125,8 +126,8 @@ int main(int, char **)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // My Code
-        // DSPC::RenderUI();
+        // My GUI
+        application.Run();
 
         // Rendering
         ImGui::Render();
