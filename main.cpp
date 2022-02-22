@@ -107,8 +107,7 @@ int main(int, char **)
     //IM_ASSERT(font != NULL);
 
     // Our state
-    bool sqw = false, spw = false;
-    DSPC::Application application = DSPC::Application(sqw, spw);
+    DSPC::Application application = DSPC::Application(false, false);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop

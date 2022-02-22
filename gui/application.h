@@ -19,5 +19,4 @@ namespace DSPC
   };
 
   void WrapInDockSpace(std::function<void(void)> render_func);
-
 } // namespace DSPC

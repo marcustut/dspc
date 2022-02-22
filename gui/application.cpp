@@ -1,8 +1,11 @@
 #include "application.h"
 
 #include "imgui.h"
-
 #include <iostream>
+#include <string>
+
+#include "core/linear_regression/least_square.h"
+#include "core/coordinate.h"
 
 namespace DSPC
 {
@@ -36,9 +39,16 @@ namespace DSPC
                         *sqw = ImGui::Button("Run Sequential");
                       else
                       {
+                        DSPC::LinearRegression::LeastSquare lin_reg = DSPC::LinearRegression::LeastSquare(std::vector<Coordinate>{
+                            (Coordinate){1, 3},
+                            (Coordinate){2, 7},
+                            (Coordinate){2.5, 7.5},
+                        });
                         ImGui::Button("Run Sequential");
                         ImGui::Begin(sequential_window_id, sqw);
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
+                        // ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
+                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Formula: %s", lin_reg.Formula().c_str());
+                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "When X = 1.5, Y = %f", lin_reg.PredictY(1.5).y);
                         ImGui::End();
                       }
 
@@ -74,7 +84,7 @@ namespace DSPC
   void WrapInDockSpace(std::function<void(void)> render_func)
   {
     static bool opt_fullscreen = true;
-    static bool opt_padding = true;
+    static bool opt_padding = false;
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,

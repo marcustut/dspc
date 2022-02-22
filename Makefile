@@ -16,13 +16,13 @@
 
 EXE = main
 IMGUI_DIR = lib/imgui
-SOURCES = $(shell find . -type f -name '*.cpp')
+SOURCES = $(shell find . -type f -name '*.cpp') 
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -g -Wall -Wformat --std=c++20
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I./
+CXXFLAGS += -g -Wall -Wformat --std=c++17
 LIBS =
 
 ##---------------------------------------------------------------------
@@ -72,6 +72,12 @@ endif
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:gui/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:core/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:core/linear_regression/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/%.cpp
