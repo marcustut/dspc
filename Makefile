@@ -1,96 +1,101 @@
 #
-# Cross Platform Makefile
-# Compatible with MSYS2/MINGW, Ubuntu 14.04.1 and Mac OS X
+# Makefile to use with emscripten
+# See https://emscripten.org/docs/getting_started/downloads.html
+# for installation instructions.
 #
-# You will need GLFW (http://www.glfw.org):
-# Linux:
-#   apt-get install libglfw-dev
-# Mac OS X:
-#   brew install glfw
-# MSYS2:
-#   pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-glfw
+# This Makefile assumes you have loaded emscripten's environment.
+# (On Windows, you may need to execute emsdk_env.bat or encmdprompt.bat ahead)
 #
+# Running `make` will produce three files:
+#  - web/index.html
+#  - web/index.js
+#  - web/index.wasm
+#
+# All three are needed to run the demo.
 
-#CXX = g++
-#CXX = clang++
-
-EXE = main
+CC = emcc
+CXX = em++
+WEB_DIR = web
+EXE = $(WEB_DIR)/index.html
 IMGUI_DIR = lib/imgui
+SOURCES = main.cpp
 SOURCES = $(shell find . -type f -name '*.cpp') 
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
-LINUX_GL_LIBS = -lGL
-
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I./
-CXXFLAGS += -g -Wall -Wformat --std=c++17
-LIBS =
-
-##---------------------------------------------------------------------
-## OPENGL ES
-##---------------------------------------------------------------------
-
-## This assumes a GL ES library available in the system, e.g. libGLESv2.so
-# CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2
-# LINUX_GL_LIBS = -lGLESv2
+CPPFLAGS =
+CXXFLAGS =
+LDFLAGS =
+EMS =
 
 ##---------------------------------------------------------------------
-## BUILD FLAGS PER PLATFORM
+## EMSCRIPTEN OPTIONS
 ##---------------------------------------------------------------------
 
-ifeq ($(UNAME_S), Linux) #LINUX
-	ECHO_MESSAGE = "Linux"
-	LIBS += $(LINUX_GL_LIBS) `pkg-config --static --libs glfw3`
+# ("EMS" options gets added to both CPPFLAGS and LDFLAGS, whereas some options are for linker only)
+EMS += -s USE_SDL=2
+EMS += -s DISABLE_EXCEPTION_CATCHING=1
+LDFLAGS += -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=0 -s ASSERTIONS=1
 
-	CXXFLAGS += `pkg-config --cflags glfw3`
-	CFLAGS = $(CXXFLAGS)
+# Uncomment next line to fix possible rendering bugs with Emscripten version older then 1.39.0 (https://github.com/ocornut/imgui/issues/2877)
+#EMS += -s BINARYEN_TRAP_MODE=clamp
+#EMS += -s SAFE_HEAP=1    ## Adds overhead
+
+# Emscripten allows preloading a file or folder to be accessible at runtime.
+# The Makefile for this example project suggests embedding the misc/fonts/ folder into our application, it will then be accessible as "/fonts"
+# See documentation for more details: https://emscripten.org/docs/porting/files/packaging_files.html
+# (Default value is 0. Set to 1 to enable file-system and include the misc/fonts/ folder as part of the build.)
+USE_FILE_SYSTEM ?= 0
+ifeq ($(USE_FILE_SYSTEM), 0)
+LDFLAGS += -s NO_FILESYSTEM=1
+CPPFLAGS += -DIMGUI_DISABLE_FILE_FUNCTIONS
+endif
+ifeq ($(USE_FILE_SYSTEM), 1)
+LDFLAGS += --no-heap-copy --preload-file ../../misc/fonts@/fonts
 endif
 
-ifeq ($(UNAME_S), Darwin) #APPLE
-	ECHO_MESSAGE = "Mac OS X"
-	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
-	LIBS += -L/usr/local/lib -L/opt/local/lib -L/opt/homebrew/lib
-	#LIBS += -lglfw3
-	LIBS += -lglfw
+##---------------------------------------------------------------------
+## FINAL BUILD FLAGS
+##---------------------------------------------------------------------
 
-	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
-	CFLAGS = $(CXXFLAGS)
-endif
-
-ifeq ($(OS), Windows_NT)
-	ECHO_MESSAGE = "MinGW"
-	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32
-
-	CXXFLAGS += `pkg-config --cflags glfw3`
-	CFLAGS = $(CXXFLAGS)
-endif
+CPPFLAGS += -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I./
+#CPPFLAGS += -g
+CPPFLAGS += -Wall -Wformat -Os $(EMS)
+CXXFLAGS += --std=c++17
+LDFLAGS += --shell-file shell_minimal.html $(EMS)
 
 ##---------------------------------------------------------------------
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
 %.o:%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 %.o:gui/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 %.o:core/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 %.o:core/linear_regression/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/backends/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 all: $(EXE)
-	@echo Build complete for $(ECHO_MESSAGE)
+	@echo Build complete for $(EXE)
 
-$(EXE): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+$(WEB_DIR):
+	mkdir $@
+
+serve: all
+	python3 -m http.server -d $(WEB_DIR)
+
+$(EXE): $(OBJS) $(WEB_DIR)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
 
 clean:
-	rm -f $(EXE) $(OBJS)
+	rm -rf $(OBJS) $(WEB_DIR)
