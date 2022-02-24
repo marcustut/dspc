@@ -10,17 +10,10 @@
 namespace DSPC
 {
   // constructor for the Application class
-  Application::Application(
-      bool show_sequential_window,
-      bool show_parallel_window) : show_sequential_window(show_sequential_window),
-                                   show_parallel_window(show_parallel_window)
-  {
-  }
+  Application::Application() {}
 
   // destructor for the Application class
-  Application::~Application()
-  {
-  }
+  Application::~Application() {}
 
   void Application::RenderUI()
   {
@@ -28,10 +21,10 @@ namespace DSPC
     bool *spw = &show_parallel_window;
     WrapInDockSpace([&sqw, &spw]()
                     {
-                      const char *sequential_window_id = "Machine Learning in Sequential";
-                      const char *parallel_window_id = "Machine Learning in Parallel";
+                      const char *sequential_window_id = "Linear Regression in Sequential";
+                      const char *parallel_window_id = "Linear Regression in Parallel";
 
-                      ImGui::Begin("DSPC Assignment - Machine Learning");
+                      ImGui::Begin("DSPC Assignment - Linear Regression");
                       // ImGui::ShowDemoWindow();
                       ImGui::Text("Hello, World");
 
@@ -39,16 +32,57 @@ namespace DSPC
                         *sqw = ImGui::Button("Run Sequential");
                       else
                       {
-                        DSPC::LinearRegression::LeastSquare lin_reg = DSPC::LinearRegression::LeastSquare(std::vector<Coordinate>{
-                            (Coordinate){1, 3},
-                            (Coordinate){2, 7},
-                            (Coordinate){2.5, 7.5},
-                        });
-                        ImGui::Button("Run Sequential");
+                        std::vector<std::string> players{"Cade Cunningham", "Anthony Edwards", "Zion Williamson", "DeAndre Ayton", "Lonzo Ball"};
+                        std::vector<Coordinate> coordinates{
+                            (Coordinate){1, 10.0},
+                            (Coordinate){2, 10.2},
+                            (Coordinate){3, 10.7},
+                            (Coordinate){4, 12.6},
+                            (Coordinate){5, 18.6},
+                        };
+                        DSPC::LinearRegression::LeastSquare lin_reg = DSPC::LinearRegression::LeastSquare(coordinates);
+
                         ImGui::Begin(sequential_window_id, sqw);
-                        // ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Formula: %s", lin_reg.Formula().c_str());
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "When X = 1.5, Y = %f", lin_reg.PredictY(1.5).y);
+
+                        ImGui::Text("Below table shows the data fed to the Linear Regression model");
+
+                        static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+                        ImVec2 outer_size = ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 8);
+                        if (ImGui::BeginTable("table_scrolly", 3, flags, outer_size))
+                        {
+                          ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+                          ImGui::TableSetupColumn("Player's Name", ImGuiTableColumnFlags_None);
+                          ImGui::TableSetupColumn("Number of Years in the NBA", ImGuiTableColumnFlags_None);
+                          ImGui::TableSetupColumn("Current Salary (USD, in millions)", ImGuiTableColumnFlags_None);
+                          ImGui::TableHeadersRow();
+
+                          // Demonstrate using clipper for large vertical lists
+                          ImGuiListClipper clipper;
+                          clipper.Begin(coordinates.size());
+                          while (clipper.Step())
+                          {
+                            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+                            {
+                              ImGui::TableNextRow();
+                              for (int column = 0; column < 3; column++)
+                              {
+                                ImGui::TableSetColumnIndex(column);
+                                if (column == 0)
+                                  ImGui::Text("%s", players[row].c_str());
+                                else if (column == 1)
+                                  ImGui::Text("%.0f", coordinates[row].x);
+                                else if (column == 2)
+                                  ImGui::Text("%.1f", coordinates[row].y);
+                              }
+                            }
+                          }
+                          ImGui::EndTable();
+                        }
+
+                        ImGui::Text("Formula of the straight line: %s", lin_reg.Formula().c_str());
+                        ImGui::Text("When X = 6, Y = %.1f", lin_reg.PredictY(6).y);
+                        ImGui::Text("Hence, based on the data given, the predicted salary of an NBA player with six years of experience is %.2f million USD.", lin_reg.PredictY(6).y);
+
                         ImGui::End();
                       }
 
@@ -56,7 +90,6 @@ namespace DSPC
                         *spw = ImGui::Button("Run Parallel");
                       else
                       {
-                        ImGui::Button("Run Parallel");
                         ImGui::Begin(parallel_window_id, spw);
                         ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
                         ImGui::End();

@@ -20,7 +20,8 @@ namespace DSPC::LinearRegression
 
     // CalculateYIntercept calculates y-intercept of straight line
     // based on given coordinates and update the 'c' variable.
-    // NOTE: This should be called only after 'm' is initialized else, it will throw and exception.
+    // NOTE: This should be called only after 'm' is initialized else,
+    //       it will throw and exception.
     void CalculateYIntercept();
 
   public:

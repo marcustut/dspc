@@ -7,13 +7,14 @@ namespace DSPC
   class Application
   {
   private:
-    bool show_sequential_window;
-    bool show_parallel_window;
+    bool show_sequential_window = false;
+    bool show_parallel_window = false;
 
     void RenderUI();
+    void RunSequential();
 
   public:
-    Application(bool show_sequential_window, bool show_parallel_window);
+    Application();
     ~Application();
     void Run();
   };
