@@ -40,7 +40,8 @@ namespace DSPC
                             (Coordinate){4, 12.6},
                             (Coordinate){5, 18.6},
                         };
-                        DSPC::LinearRegression::LeastSquare lin_reg = DSPC::LinearRegression::LeastSquare(coordinates);
+                        LinearRegression::LeastSquare lin_reg = LinearRegression::LeastSquare(LinearRegression::Technique::Serial, coordinates);
+                        lin_reg.InitModel();
 
                         ImGui::Begin(sequential_window_id, sqw);
 

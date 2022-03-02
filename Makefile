@@ -71,13 +71,16 @@ endif
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:gui/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
 %.o:core/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:core/linear_regression/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:gui/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:util/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/%.cpp

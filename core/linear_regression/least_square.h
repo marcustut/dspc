@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "core/coordinate.h"
+#include "core/linear_regression/technique.h"
 
 namespace DSPC::LinearRegression
 {
@@ -11,6 +12,8 @@ namespace DSPC::LinearRegression
   private:
     // coordinates is the set of (x, y) coordinates
     std::vector<Coordinate> coordinates;
+    // technique is the method used for executing the least square algorithm
+    Technique technique;
     // m is the gradient, c is the y-intercept
     double m, c;
 
@@ -25,11 +28,14 @@ namespace DSPC::LinearRegression
     void CalculateYIntercept();
 
   public:
-    LeastSquare(std::vector<Coordinate> coordinates);
+    LeastSquare(Technique technique);
+    LeastSquare(Technique technique, std::vector<Coordinate> coordinates);
     ~LeastSquare();
 
+    void SetCoordinates(std::vector<Coordinate> coordinates);
+    void InitModel();
     Coordinate PredictX(double Y);
     Coordinate PredictY(double X);
     std::string Formula();
   };
-} // namespace DSPC
+} 
