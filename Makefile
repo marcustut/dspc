@@ -11,17 +11,20 @@
 #   pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-glfw
 #
 
+# Make does not offer a recursive wildcard function, so here's one:
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
 #CXX = g++
 #CXX = clang++
 
 EXE = main
 IMGUI_DIR = lib/imgui
-SOURCES = $(shell find . -type f -name '*.cpp') 
+SOURCES = $(wildcard *.cpp) $(call rwildcard,*/,*.cpp)
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I./
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
 CXXFLAGS += -g -Wall -Wformat --std=c++17
 LIBS =
 
@@ -97,3 +100,6 @@ $(EXE): $(OBJS)
 
 clean:
 	rm -f $(EXE) $(OBJS)
+
+print-sources:
+	@echo $(SOURCES)

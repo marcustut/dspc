@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "core/coordinate.h"
 #include "core/linear_regression/technique.h"
@@ -38,4 +39,4 @@ namespace DSPC::LinearRegression
     Coordinate PredictY(double X);
     std::string Formula();
   };
-} 
+}

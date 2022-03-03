@@ -2,6 +2,9 @@
 
 #include <string>
 #include <cstdio>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#include <stdexcept>
+#endif
 
 #include "serial.h"
 
@@ -40,17 +43,17 @@ namespace DSPC::LinearRegression
 
     switch (this->technique)
     {
-      case Technique::Serial:
-        this->m = Serial::CalculateGradient(this->coordinates);
-        break;
-      case Technique::OpenMP:
-        break;
-      case Technique::Pthread:
-        break;
-      case Technique::CppStdLib:
-        break;
-      case Technique::CUDA:
-        break;
+    case Technique::Serial:
+      this->m = Serial::CalculateGradient(this->coordinates);
+      break;
+    case Technique::OpenMP:
+      break;
+    case Technique::Pthread:
+      break;
+    case Technique::CppStdLib:
+      break;
+    case Technique::CUDA:
+      break;
     }
   }
 
@@ -58,17 +61,17 @@ namespace DSPC::LinearRegression
   {
     switch (this->technique)
     {
-      case Technique::Serial:
-        this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
-        break;
-      case Technique::OpenMP:
-        break;
-      case Technique::Pthread:
-        break;
-      case Technique::CppStdLib:
-        break;
-      case Technique::CUDA:
-        break;
+    case Technique::Serial:
+      this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
+      break;
+    case Technique::OpenMP:
+      break;
+    case Technique::Pthread:
+      break;
+    case Technique::CppStdLib:
+      break;
+    case Technique::CUDA:
+      break;
     }
   }
 
