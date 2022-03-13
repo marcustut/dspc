@@ -6,6 +6,7 @@
 
 #include "core/linear_regression/least_square.h"
 #include "core/coordinate.h"
+#include "util/data.h"
 
 namespace DSPC
 {
@@ -106,12 +107,13 @@ namespace DSPC
                       //   ImGui::EndPopup();
                       // }
 
-                      ImGui::End();
-                    });
+                      ImGui::End(); });
   }
 
   void Application::Run()
   {
+    DSPC::Util::Data data = DSPC::Util::Data("dataset/basketball.sqlite");
+    data.Test();
     RenderUI();
   }
 
