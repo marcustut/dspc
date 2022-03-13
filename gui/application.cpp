@@ -2,16 +2,40 @@
 
 #include "imgui.h"
 #include <iostream>
-#include <string>
 
 #include "core/linear_regression/least_square.h"
 #include "core/coordinate.h"
-#include "util/data.h"
+#include "core/entity/player_salary.h"
+#include "core/entity/player_attributes.h"
+
+using namespace sqlite_orm;
 
 namespace DSPC
 {
   // constructor for the Application class
-  Application::Application() {}
+  Application::Application()
+  {
+    // create the storage object
+    auto storage = make_storage(std::string("dataset/basketball.sqlite"),
+                                DSPC::Entity::PlayerSalary::TableBuilder(),
+                                DSPC::Entity::PlayerAttributes::TableBuilder());
+
+    // simulate sync (to safely check if schema matches)
+    auto result = storage.sync_schema_simulate();
+
+    // throw an error if schema does not match
+    for (auto it = result.cbegin(); it != result.cend(); it++)
+      if (it->second != sync_schema_result::already_in_sync)
+        throw std::runtime_error(std::string("Failed to sync schema for table '" + it->first + "'\n"));
+
+    // actually syncs the db
+    storage.sync_schema();
+
+    // fetch all player salaries
+    auto allPlayerSalaries = storage.get_all<DSPC::Entity::PlayerSalary::PlayerSalary>();
+
+    std::cout << "allPlayers count = " << allPlayerSalaries.size() << '\n';
+  }
 
   // destructor for the Application class
   Application::~Application() {}
@@ -112,8 +136,6 @@ namespace DSPC
 
   void Application::Run()
   {
-    DSPC::Util::Data data = DSPC::Util::Data("dataset/basketball.sqlite");
-    data.Test();
     RenderUI();
   }
 
