@@ -10,4 +10,4 @@ namespace DSPC::LinearRegression
     CppStdLib,
     CUDA,
   };
-} // namespace DSPC
+}
