@@ -80,7 +80,7 @@ endif
 %.o:core/linear_regression/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:gui/%.cpp
+%.o:ui/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:util/%.cpp

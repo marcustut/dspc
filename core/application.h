@@ -4,6 +4,10 @@
 #include <vector>
 #include <functional>
 
+#include "ui/cli.h"
+#include "ui/gui.h"
+#include "core/technique.h"
+
 namespace DSPC
 {
   enum class ApplicationType
@@ -12,30 +16,19 @@ namespace DSPC
     CLI
   };
 
-  struct PlayerData
-  {
-    std::string name;
-    double points;
-    double assists;
-    double rebounds;
-    double salary;
-  };
-
   class Application
   {
   private:
-    bool show_sequential_window = false;
-    bool show_parallel_window = false;
-    std::vector<PlayerData> players;
+    DSPC::UI::CLIState cli_state;
+    DSPC::UI::GUIState gui_state;
 
-    void RenderUI();
     void RunCLI();
     void RunGUI();
 
   public:
     Application(std::string db_path);
     ~Application();
-    void Run(ApplicationType type);
+    void Run(ApplicationType type, Technique technique);
   };
 
   void WrapInDockSpace(std::function<void(void)> render_func);

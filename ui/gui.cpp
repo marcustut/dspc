@@ -1,183 +1,8 @@
-#include "application.h"
+#include "gui.h"
 
-#include <iostream>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-#include "core/linear_regression/least_square.h"
-#include "core/coordinate.h"
-#include "core/entity/player_salary.h"
-#include "core/entity/player_attributes.h"
-
-// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
-// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
-// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#pragma comment(lib, "legacy_stdio_definitions")
-#endif
-
-using namespace sqlite_orm;
-
-namespace DSPC
+namespace DSPC::UI
 {
-  // constructor for the Application class
-  Application::Application(std::string db_path)
-  {
-    using namespace DSPC::Entity;
-
-    // create the storage object
-    auto storage = make_storage(db_path,
-                                PlayerSalary::TableBuilder(),
-                                PlayerAttributes::TableBuilder());
-
-    // simulate sync (to safely check if schema matches)
-    auto result = storage.sync_schema_simulate();
-
-    // throw an error if schema does not match
-    for (auto it = result.cbegin(); it != result.cend(); it++)
-      if (it->second != sync_schema_result::already_in_sync)
-        throw std::runtime_error(std::string("Failed to sync schema for table '" + it->first + "'\n"));
-
-    // actually syncs the db
-    storage.sync_schema();
-
-    // SELECT PS.namePlayer, PA.PTS, PA.AST, PA.REB, MAX(IFNULL(PS.value, 0))
-    // FROM Player_Salary PS, Player_Attributes PA
-    // WHERE PA.FIRST_NAME || ' ' || PA.LAST_NAME = PS.namePlayer
-    // GROUP BY PS.namePlayer
-    // ORDER BY PS.value DESC;
-    auto rows = storage.select(
-        columns(&PlayerSalary::PlayerSalary::namePlayer, &PlayerAttributes::PlayerAttributes::PTS, &PlayerAttributes::PlayerAttributes::AST, &PlayerAttributes::PlayerAttributes::REB, max(ifnull<double>(&PlayerSalary::PlayerSalary::value, 0))),
-        where(
-            c(
-                c(&PlayerAttributes::PlayerAttributes::FIRST_NAME) || " " || c(&PlayerAttributes::PlayerAttributes::LAST_NAME)) == &PlayerSalary::PlayerSalary::namePlayer),
-        group_by(&PlayerSalary::PlayerSalary::namePlayer),
-        order_by(&PlayerSalary::PlayerSalary::value).desc());
-
-    for (auto &row : rows)
-    {
-      // skip invalid data
-      if (std::get<0>(row) == nullptr || std::get<1>(row) == nullptr || std::get<2>(row) == nullptr || std::get<3>(row) == nullptr || std::get<4>(row) == nullptr)
-        continue;
-
-      this->players.push_back(PlayerData{*std::get<0>(row), *std::get<1>(row), *std::get<2>(row), *std::get<3>(row), *std::get<4>(row)});
-    }
-
-    std::cout << "[DEBUG] " << this->players.size() << " player's data are loaded." << '\n';
-  }
-
-  // destructor for the Application class
-  Application::~Application() {}
-
-  void Application::RenderUI()
-  {
-    bool *sqw = &show_sequential_window;
-    bool *spw = &show_parallel_window;
-    std::vector<PlayerData> pls = this->players;
-    WrapInDockSpace([&sqw, &spw, pls]()
-                    {
-                      const char *sequential_window_id = "Linear Regression in Sequential";
-                      const char *parallel_window_id = "Linear Regression in Parallel";
-
-                      ImGui::Begin("DSPC Assignment - Linear Regression");
-                      // ImGui::ShowDemoWindow();
-                      ImGui::Text("Hello, World");
-
-                      if (!*sqw)
-                        *sqw = ImGui::Button("Run Sequential");
-                      else
-                      {
-                        std::cout << pls.size() << '\n';
-                        std::vector<std::string> players{"Cade Cunningham", "Anthony Edwards", "Zion Williamson", "DeAndre Ayton", "Lonzo Ball"};
-                        std::vector<Coordinate> coordinates{
-                            (Coordinate){1, 10.0},
-                            (Coordinate){2, 10.2},
-                            (Coordinate){3, 10.7},
-                            (Coordinate){4, 12.6},
-                            (Coordinate){5, 18.6},
-                        };
-                        LinearRegression::LeastSquare lin_reg = LinearRegression::LeastSquare(LinearRegression::Technique::Serial, coordinates);
-                        lin_reg.InitModel();
-
-                        ImGui::Begin(sequential_window_id, sqw);
-
-                        ImGui::Text("Below table shows the data fed to the Linear Regression model");
-
-                        static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-                        ImVec2 outer_size = ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 8);
-                        if (ImGui::BeginTable("table_scrolly", 3, flags, outer_size))
-                        {
-                          ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
-                          ImGui::TableSetupColumn("Player's Name", ImGuiTableColumnFlags_None);
-                          ImGui::TableSetupColumn("Number of Years in the NBA", ImGuiTableColumnFlags_None);
-                          ImGui::TableSetupColumn("Current Salary (USD, in millions)", ImGuiTableColumnFlags_None);
-                          ImGui::TableHeadersRow();
-
-                          // Demonstrate using clipper for large vertical lists
-                          ImGuiListClipper clipper;
-                          clipper.Begin(coordinates.size());
-                          while (clipper.Step())
-                          {
-                            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
-                            {
-                              ImGui::TableNextRow();
-                              for (int column = 0; column < 3; column++)
-                              {
-                                ImGui::TableSetColumnIndex(column);
-                                if (column == 0)
-                                  ImGui::Text("%s", players[row].c_str());
-                                else if (column == 1)
-                                  ImGui::Text("%.0f", coordinates[row].x);
-                                else if (column == 2)
-                                  ImGui::Text("%.1f", coordinates[row].y);
-                              }
-                            }
-                          }
-                          ImGui::EndTable();
-                        }
-
-                        ImGui::Text("Formula of the straight line: %s", lin_reg.Formula().c_str());
-                        ImGui::Text("When X = 6, Y = %.1f", lin_reg.PredictY(6).y);
-                        ImGui::Text("Hence, based on the data given, the predicted salary of an NBA player with six years of experience is %.2f million USD.", lin_reg.PredictY(6).y);
-
-                        ImGui::End();
-                      }
-
-                      if (!*spw)
-                        *spw = ImGui::Button("Run Parallel");
-                      else
-                      {
-                        ImGui::Begin(parallel_window_id, spw);
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
-                        ImGui::End();
-                      }
-
-                      // if (ImGui::BeginPopupModal(sequential_window_id, NULL, ImGuiWindowFlags_AlwaysAutoResize))
-                      // {
-                      //   ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
-
-                      //   if (ImGui::Button("Close"))
-                      //     ImGui::CloseCurrentPopup();
-
-                      //   ImGui::EndPopup();
-                      // }
-
-                      ImGui::End(); });
-  }
-
-  void Application::RunCLI()
-  {
-    for (auto &player : players)
-      printf("  %s: (%.1f PTS) (%.1f AST) (%.1f REB) - $%.2f\n", player.name.c_str(), player.points, player.assists, player.rebounds, player.salary);
-  }
-
-  void Application::RunGUI()
+  std::tuple<GLFWwindow *, const char *> SetupWindow(int width, int height, const char *title)
   {
     auto glfw_error_callback = [](int error, const char *description)
     {
@@ -219,6 +44,11 @@ namespace DSPC
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
+    return std::make_tuple(window, glsl_version);
+  }
+
+  void SetupImGui(GLFWwindow *window, const char *glsl_version)
+  {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -261,8 +91,13 @@ namespace DSPC
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
     // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     // IM_ASSERT(font != NULL);
+  }
 
-    // Our state
+  void MainLoop(GLFWwindow *window, std::function<void(void)> render_func)
+  {
+    ImGuiIO &io = ImGui::GetIO();
+
+    // state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -280,8 +115,8 @@ namespace DSPC
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      // My GUI
-      RenderUI();
+      // Render User Defined GUI
+      render_func();
 
       // Rendering
       ImGui::Render();
@@ -305,22 +140,16 @@ namespace DSPC
 
       glfwSwapBuffers(window);
     }
+  }
 
-    // Cleanup
+  void CleanUp(GLFWwindow *window)
+  {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
-  }
-
-  void Application::Run(ApplicationType type)
-  {
-    if (type == ApplicationType::CLI)
-      RunCLI();
-    else if (type == ApplicationType::GUI)
-      RunGUI();
   }
 
   void WrapInDockSpace(std::function<void(void)> render_func)
@@ -380,4 +209,95 @@ namespace DSPC
 
     ImGui::End();
   }
-} // namespace DSPC
+
+  void RenderGUI(GUIState *state)
+  {
+    const char *sequential_window_id = "Linear Regression in Sequential";
+    const char *parallel_window_id = "Linear Regression in Parallel";
+
+    ImGui::Begin("DSPC Assignment - Linear Regression");
+    // ImGui::ShowDemoWindow();
+    ImGui::Text("Hello, World");
+
+    if (!state->show_sequential_window)
+      state->show_sequential_window = ImGui::Button("Run Sequential");
+    else
+    {
+      // std::vector<std::string> players{"Cade Cunningham", "Anthony Edwards", "Zion Williamson", "DeAndre Ayton", "Lonzo Ball"};
+      // std::vector<Coordinate> coordinates{
+      //     (Coordinate){1, 10.0},
+      //     (Coordinate){2, 10.2},
+      //     (Coordinate){3, 10.7},
+      //     (Coordinate){4, 12.6},
+      //     (Coordinate){5, 18.6},
+      // };
+      // LinearRegression::LeastSquare lin_reg = LinearRegression::LeastSquare(Technique::Serial, coordinates);
+      // lin_reg.InitModel();
+
+      ImGui::Begin(sequential_window_id, &state->show_sequential_window);
+
+      ImGui::Text("Below table shows the data fed to the Linear Regression model");
+
+      static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+      ImVec2 outer_size = ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 8);
+      if (ImGui::BeginTable("table_scrolly", 3, flags, outer_size))
+      {
+        ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+        ImGui::TableSetupColumn("Player's Name", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Number of Years in the NBA", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Current Salary (USD, in millions)", ImGuiTableColumnFlags_None);
+        ImGui::TableHeadersRow();
+
+        // Demonstrate using clipper for large vertical lists
+        // ImGuiListClipper clipper;
+        // clipper.Begin(coordinates.size());
+        // while (clipper.Step())
+        // {
+        //   for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+        //   {
+        //     ImGui::TableNextRow();
+        //     for (int column = 0; column < 3; column++)
+        //     {
+        //       ImGui::TableSetColumnIndex(column);
+        //       if (column == 0)
+        //         ImGui::Text("%s", players[row].c_str());
+        //       else if (column == 1)
+        //         ImGui::Text("%.0f", coordinates[row].x);
+        //       else if (column == 2)
+        //         ImGui::Text("%.1f", coordinates[row].y);
+        //     }
+        //   }
+        // }
+        ImGui::EndTable();
+      }
+
+      // ImGui::Text("Formula of the straight line: %s", lin_reg.Formula().c_str());
+      // ImGui::Text("When X = 6, Y = %.1f", lin_reg.PredictY(6).y);
+      // ImGui::Text("Hence, based on the data given, the predicted salary of an NBA player with six years of experience is %.2f million USD.", lin_reg.PredictY(6).y);
+
+      ImGui::End();
+    }
+
+    if (!state->show_parallel_window)
+      state->show_parallel_window = ImGui::Button("Run Parallel");
+    else
+    {
+      ImGui::Begin(parallel_window_id, &state->show_parallel_window);
+      ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
+      ImGui::End();
+    }
+
+    // if (ImGui::BeginPopupModal(sequential_window_id, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // {
+    //   ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Not implemented yet");
+
+    //   if (ImGui::Button("Close"))
+    //     ImGui::CloseCurrentPopup();
+
+    //   ImGui::EndPopup();
+    // }
+
+    ImGui::End();
+  }
+
+}

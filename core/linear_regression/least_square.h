@@ -4,7 +4,7 @@
 #include <string>
 
 #include "core/coordinate.h"
-#include "core/linear_regression/technique.h"
+#include "core/technique.h"
 
 namespace DSPC::LinearRegression
 {
