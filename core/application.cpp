@@ -7,6 +7,7 @@
 #include "core/entity/player_salary.h"
 #include "core/entity/player_attributes.h"
 #include "core/player_data.h"
+#include "util/time.h"
 
 using namespace sqlite_orm;
 
@@ -66,12 +67,14 @@ namespace DSPC
   // destructor for the Application class
   Application::~Application() {}
 
-  void Application::RunCLI()
+  void Application::RunCLI(Technique technique)
   {
+    auto timer = DSPC::Util::Timer("RunCLI");
+
     DSPC::UI::RenderCLI(&this->cli_state);
   }
 
-  void Application::RunGUI()
+  void Application::RunGUI(Technique technique)
   {
     GLFWwindow *window;
     const char *glsl_version;
@@ -90,8 +93,8 @@ namespace DSPC
   void Application::Run(ApplicationType type, Technique technique)
   {
     if (type == ApplicationType::CLI)
-      RunCLI();
+      RunCLI(technique);
     else if (type == ApplicationType::GUI)
-      RunGUI();
+      RunGUI(technique);
   }
 }

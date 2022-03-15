@@ -22,8 +22,8 @@ namespace DSPC
     DSPC::UI::CLIState cli_state;
     DSPC::UI::GUIState gui_state;
 
-    void RunCLI();
-    void RunGUI();
+    void RunCLI(Technique technique);
+    void RunGUI(Technique technique);
 
   public:
     Application(std::string db_path);
