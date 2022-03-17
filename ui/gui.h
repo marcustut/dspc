@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif

@@ -1,5 +1,7 @@
 #include "gui.h"
 
+#include <stdexcept>
+
 namespace DSPC::UI
 {
   std::tuple<GLFWwindow *, const char *> SetupWindow(int width, int height, const char *title)

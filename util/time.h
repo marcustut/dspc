@@ -4,7 +4,7 @@
 #include <thread>
 #include <iostream>
 
-#ifdef _WIN32 || _WIN64
+#ifdef _WIN32
 #define TIME_POINT std::chrono::time_point<std::chrono::system_clock>
 #else
 #define TIME_POINT std::chrono::time_point<std::chrono::steady_clock>
