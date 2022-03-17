@@ -71,7 +71,18 @@ namespace DSPC
   {
     auto timer = DSPC::Util::Timer("RunCLI");
 
-    DSPC::UI::RenderCLI(&this->cli_state);
+    std::vector<Coordinate> coordinates;
+
+    std::transform(
+        this->cli_state.players.begin(),
+        this->cli_state.players.end(),
+        std::back_inserter(coordinates),
+        [](PlayerData p)
+        { return Coordinate{p.points, p.salary}; });
+
+    auto lin_reg = LinearRegression::LeastSquare(technique, coordinates);
+
+    // DSPC::UI::RenderCLI(&this->cli_state);
   }
 
   void Application::RunGUI(Technique technique)

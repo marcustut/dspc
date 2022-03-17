@@ -4,12 +4,18 @@
 #include <thread>
 #include <iostream>
 
+#ifdef _WIN32 || _WIN64
+#define TIME_POINT std::chrono::time_point<std::chrono::system_clock>
+#else
+#define TIME_POINT std::chrono::time_point<std::chrono::steady_clock>
+#endif
+
 namespace DSPC::Util
 {
   struct Timer
   {
     const char *operation_name;
-    std::chrono::time_point<std::chrono::steady_clock> start;
+    TIME_POINT start;
     std::chrono::duration<float> duration;
 
     Timer() { start = std::chrono::high_resolution_clock::now(); }
