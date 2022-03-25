@@ -63,7 +63,8 @@ ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
 	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32
 
-	CXXFLAGS += `pkg-config --cflags glfw3` -I"C:\Program Files (x86)\sqlite_orm\include"
+	CXXFLAGS += `pkg-config --cflags glfw3`
+	CXXFLAGS += -I "C:/Program Files (x86)/sqlite_orm/include"
 	CFLAGS = $(CXXFLAGS)
 endif
 
@@ -80,7 +81,7 @@ endif
 %.o:core/linear_regression/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:gui/%.cpp
+%.o:ui/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:util/%.cpp

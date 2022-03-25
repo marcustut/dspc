@@ -3,7 +3,8 @@
 #include <cstdio>
 #include <stdexcept>
 
-#include "serial.h"
+#include "core/linear_regression/serial.h"
+#include "core/linear_regression/pthread.h"
 
 namespace DSPC::LinearRegression
 {
@@ -46,6 +47,7 @@ namespace DSPC::LinearRegression
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
+      this->m = Pthread::CalculateGradient(this->coordinates);
       break;
     case Technique::CppStdLib:
       break;
@@ -64,6 +66,7 @@ namespace DSPC::LinearRegression
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
+      this->m = Pthread::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::CppStdLib:
       break;

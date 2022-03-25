@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DSPC::LinearRegression
+namespace DSPC
 {
   enum class Technique
   {
