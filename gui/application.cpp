@@ -175,6 +175,9 @@ namespace DSPC
   {
     for (auto &player : players)
       printf("  %s: (%.1f PTS) (%.1f AST) (%.1f REB) - $%.2f\n", player.name.c_str(), player.points, player.assists, player.rebounds, player.salary);
+
+    // LinearRegression::LeastSquare lin_reg = LinearRegression::LeastSquare(LinearRegression::Technique::Serial, this->);
+    // lin_reg.InitModel();
   }
 
   void Application::RunGUI()

@@ -63,7 +63,7 @@ ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
 	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32
 
-	CXXFLAGS += `pkg-config --cflags glfw3`
+	CXXFLAGS += `pkg-config --cflags glfw3` -I"C:\Program Files (x86)\sqlite_orm\include"
 	CFLAGS = $(CXXFLAGS)
 endif
 
