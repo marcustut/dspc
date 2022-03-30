@@ -8,4 +8,5 @@ namespace DSPC::LinearRegression::CUDA
 {
     double CalculateGradient(const std::vector<Coordinate> &coordinates);
     double CalculateYIntercept(const std::vector<Coordinate> &coordinates, const double gradient);
+    void EndCuda();
 }
