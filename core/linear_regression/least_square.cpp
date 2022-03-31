@@ -57,12 +57,18 @@ namespace DSPC::LinearRegression
     switch (this->technique)
     {
     case Technique::Serial:
-      this->m = this->type == Type::Normal ? Serial::CalculateGradient(this->coordinates) : Serial::CalculateGradient(this->multivariate_coordinates);
+      if (this->type == Type::Normal)
+        this->m = Serial::CalculateGradient(this->coordinates);
+      else
+        std::tie(this->b1, this->b2) = Serial::CalculateGradient(this->multivariate_coordinates);
       break;
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
-      this->m = this->type == Type::Normal ? Pthread::CalculateGradient(this->coordinates) : Pthread::CalculateGradient(this->multivariate_coordinates);
+      if (this->type == Type::Normal)
+        this->m = Pthread::CalculateGradient(this->coordinates);
+      else
+        std::tie(this->b1, this->b2) = Pthread::CalculateGradient(this->multivariate_coordinates);
       break;
     case Technique::CppStdLib:
       break;
@@ -76,12 +82,18 @@ namespace DSPC::LinearRegression
     switch (this->technique)
     {
     case Technique::Serial:
-      this->c = this->type == Type::Normal ? Serial::CalculateYIntercept(this->coordinates, this->m) : Serial::CalculateYIntercept(this->multivariate_coordinates, this->m);
+      if (this->type == Type::Normal)
+        this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
+      else
+        this->a = Serial::CalculateYIntercept(this->multivariate_coordinates, std::make_tuple(b1, b2));
       break;
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
-      this->c = this->type == Type::Normal ? Pthread::CalculateYIntercept(this->coordinates, this->m) : Pthread::CalculateYIntercept(this->multivariate_coordinates, this->m);
+      if (this->type == Type::Normal)
+        this->c = Pthread::CalculateYIntercept(this->coordinates, this->m);
+      else
+        this->a = Pthread::CalculateYIntercept(this->multivariate_coordinates, std::make_tuple(b1, b2));
       break;
     case Technique::CppStdLib:
       break;

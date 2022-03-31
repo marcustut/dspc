@@ -21,8 +21,10 @@ namespace DSPC::LinearRegression
     Technique technique;
     // type is the type of linear regression
     Type type;
-    // m is the gradient, c is the y-intercept
+    // m is the gradient, c is the y-intercept (for single linear regression)
     double m, c;
+    // b1 is the gradient for x1, b2 is the gradient for x2, a is the y-intercept (for multivariate linear regression)
+    double b1, b2, a;
 
     // CalculateGradient calculates gradient of straight line
     // based on given coordinates and update the 'm' variable.

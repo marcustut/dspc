@@ -83,63 +83,56 @@ namespace DSPC::LinearRegression::Serial
         return (1 / (double)n) * (sum_y - gradient * sum_x);
     }
 
-    double CalculateGradient(const std::vector<MultivariateCoordinate> &multivariate_coordinates)
+    std::tuple<double, double> CalculateGradient(const std::vector<MultivariateCoordinate> &mc)
     {
         // num of coordinate
-        int n = multivariate_coordinates.size();
+        int n = mc.size();
+        std::vector<double> result;
 
-        double sum_of_x1 = std::accumulate(multivariate_coordinates.begin(), multivariate_coordinates.end(), 0.0, [](double pv, MultivariateCoordinate c)
+        double sum_of_x1 = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                            { return pv + c.xs[0]; });
-        double sum_of_x2 = std::accumulate(multivariate_coordinates.begin(), multivariate_coordinates.end(), 0.0, [](double pv, MultivariateCoordinate c)
+        double sum_of_x2 = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                            { return pv + c.xs[1]; });
-        double sum_of_y = std::accumulate(multivariate_coordinates.begin(), multivariate_coordinates.end(), 0.0, [](double pv, MultivariateCoordinate c)
+        double sum_of_y = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                           { return pv + c.y; });
 
         double mean_x1 = sum_of_x1 / n;
         double mean_x2 = sum_of_x2 / n;
         double mean_y = sum_of_y / n;
 
-        double sum_of_squares_x1 = std::accumulate(multivariate_coordinates.begin(), multivariate_coordinates.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+        double sum_of_squares_x1 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
                                                    { return pv + std::pow(c.xs[0] - mean_x1, 2); });
-        double sum_of_squares_x2 = std::accumulate(multivariate_coordinates.begin(), multivariate_coordinates.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+        double sum_of_squares_x2 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
                                                    { return pv + std::pow(c.xs[1] - mean_x2, 2); });
 
-        fmt::print("Sum of X1: {}\n", sum_of_x1);
-        fmt::print("Sum of X2: {}\n", sum_of_x2);
-        fmt::print("Sum of Y: {}\n", sum_of_y);
-        fmt::print("Mean X1: {}\n", mean_x1);
-        fmt::print("Mean X2: {}\n", mean_x2);
-        fmt::print("Mean Y: {}\n", mean_y);
-        fmt::print("Sum of Squares X1: {}\n", sum_of_squares_x1);
-        fmt::print("Sum of Squares X2: {}\n", sum_of_squares_x2);
+        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
+                       { return (a.xs[0] - mean_x1) * (b.y - mean_y); });
+        double sum_of_products_x1_y = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
+                                                      { return pv + val; });
+        result.clear();
 
-        return 0.0;
+        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
+                       { return (a.xs[1] - mean_x2) * (b.y - mean_y); });
+        double sum_of_products_x2_y = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
+                                                      { return pv + val; });
+        result.clear();
+
+        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
+                       { return (a.xs[0] - mean_x1) * (b.xs[1] - mean_x2); });
+        double sum_of_products_x1_x2 = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
+                                                       { return pv + val; });
+        result.clear();
+
+        double b1 = (sum_of_products_x1_y * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x2_y) / (sum_of_squares_x1 * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x1_x2);
+
+        double b2 = (sum_of_products_x2_y * sum_of_squares_x1 - sum_of_products_x1_x2 * sum_of_products_x1_y) / (sum_of_squares_x1 * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x1_x2);
+
+        double a = mean_y - (b1 * mean_x1) - (b2 * mean_x2);
+
+        return std::make_tuple(b1, b2);
     }
-    double CalculateYIntercept(const std::vector<MultivariateCoordinate> &multivariate_coordinates, const double gradient)
+    double CalculateYIntercept(const std::vector<MultivariateCoordinate> &mc, const std::tuple<double, double> gradient)
     {
-        // num of coordinates
-        int n = multivariate_coordinates.size();
-
-        // sum of y
-        std::vector<double> vec_y;
-        std::transform(
-            multivariate_coordinates.begin(),
-            multivariate_coordinates.end(),
-            std::back_inserter(vec_y),
-            [](MultivariateCoordinate c)
-            { return c.y; });
-        double sum_y = std::accumulate(vec_y.begin(), vec_y.end(), 0.0);
-
-        // sum of x
-        std::vector<double> vec_x;
-        std::transform(
-            multivariate_coordinates.begin(),
-            multivariate_coordinates.end(),
-            std::back_inserter(vec_x),
-            [](MultivariateCoordinate c)
-            { return c.y; });
-        double sum_x = std::accumulate(vec_x.begin(), vec_x.end(), 0.0);
-
-        return (1 / (double)n) * (sum_y - gradient * sum_x);
+        return 0.0;
     }
 }

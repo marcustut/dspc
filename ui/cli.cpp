@@ -1,7 +1,7 @@
 #include "cli.h"
 
 #include <stdio.h>
-#include <iostream>
+#include <fmt/ranges.h>
 
 #include "core/linear_regression/serial.h"
 
@@ -21,7 +21,7 @@ namespace DSPC::UI
         (MultivariateCoordinate){{19, 18}, 4000},
     };
 
-    double res = DSPC::LinearRegression::Serial::CalculateGradient(coords);
-    std::cout << res << std::endl;
+    auto res = DSPC::LinearRegression::Serial::CalculateGradient(coords);
+    fmt::print("{}\n", res);
   }
 }
