@@ -25,8 +25,8 @@ UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
-CXXFLAGS += -g -Wall -Wformat --std=c++17
-LIBS = -lsqlite3
+CXXFLAGS += -g -Wall -Wformat --std=c++17 
+LIBS = -lsqlite3 -lfmt
 
 ##---------------------------------------------------------------------
 ## OPENGL ES
@@ -51,7 +51,7 @@ endif
 ifeq ($(UNAME_S), Darwin) #APPLE
 	ECHO_MESSAGE = "Mac OS X"
 	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
-	LIBS += -L/usr/local/lib -L/opt/local/lib -L/opt/homebrew/lib
+	LIBS += -L/usr/local/lib -L/opt/homebrew/lib
 	#LIBS += -lglfw3
 	LIBS += -lglfw
 
@@ -104,3 +104,6 @@ clean:
 
 print-sources:
 	@echo $(SOURCES)
+
+print-compiler:
+	@echo $(CXX)

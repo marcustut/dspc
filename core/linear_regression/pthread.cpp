@@ -66,4 +66,14 @@ namespace DSPC::LinearRegression::Pthread
   {
     return 0.0;
   }
+
+  double CalculateGradient(const std::vector<MultivariateCoordinate> &multivariate_coordinates)
+  {
+    return 0.0;
+  }
+
+  double CalculateYIntercept(const std::vector<MultivariateCoordinate> &multivariate_coordinates, const double gradient)
+  {
+    return 0.0;
+  }
 }

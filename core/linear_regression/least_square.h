@@ -2,9 +2,11 @@
 
 #include <vector>
 #include <string>
+#include <variant>
 
 #include "core/coordinate.h"
 #include "core/technique.h"
+#include "core/type.h"
 
 namespace DSPC::LinearRegression
 {
@@ -13,8 +15,12 @@ namespace DSPC::LinearRegression
   private:
     // coordinates is the set of (x, y) coordinates
     std::vector<Coordinate> coordinates;
+    // multivariate_coordinates is the set of (x, y) coordinates
+    std::vector<MultivariateCoordinate> multivariate_coordinates;
     // technique is the method used for executing the least square algorithm
     Technique technique;
+    // type is the type of linear regression
+    Type type;
     // m is the gradient, c is the y-intercept
     double m, c;
 
@@ -29,14 +35,17 @@ namespace DSPC::LinearRegression
     void CalculateYIntercept();
 
   public:
-    LeastSquare(Technique technique);
-    LeastSquare(Technique technique, std::vector<Coordinate> coordinates);
+    LeastSquare(Technique technique, Type type);
+    LeastSquare(Technique technique, Type type, std::vector<Coordinate> coordinates);
+    LeastSquare(Technique technique, Type type, std::vector<MultivariateCoordinate> multivariate_coordinates);
     ~LeastSquare();
 
     void SetCoordinates(std::vector<Coordinate> coordinates);
+    void SetCoordinates(std::vector<MultivariateCoordinate> multivariate_coordinates);
     void InitModel();
-    Coordinate PredictX(double Y);
+    std::variant<Coordinate, MultivariateCoordinate> PredictX(double Y);
     Coordinate PredictY(double X);
+    MultivariateCoordinate PredictY(std::vector<double> Xs);
     std::string Formula();
   };
 }
