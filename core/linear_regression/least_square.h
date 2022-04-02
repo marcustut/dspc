@@ -36,6 +36,12 @@ namespace DSPC::LinearRegression
     //       it will throw and exception.
     void CalculateYIntercept();
 
+    // CalculateGradientAndYIntercept calculates both gradient of straight line
+    // and y-intercept of straight line based on given coordinates and update the
+    // 'b1', 'b2', 'a' variable.
+    // NOTE: This is only for multivariate linear regression.
+    void CalculateGradientAndYIntercept();
+
   public:
     LeastSquare(Technique technique, Type type);
     LeastSquare(Technique technique, Type type, std::vector<Coordinate> coordinates);
@@ -47,7 +53,7 @@ namespace DSPC::LinearRegression
     void InitModel();
     std::variant<Coordinate, MultivariateCoordinate> PredictX(double Y);
     Coordinate PredictY(double X);
-    MultivariateCoordinate PredictY(std::vector<double> Xs);
+    MultivariateCoordinate PredictY(std::array<double, 2> Xs);
     std::string Formula();
   };
 }

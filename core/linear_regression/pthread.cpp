@@ -67,13 +67,8 @@ namespace DSPC::LinearRegression::Pthread
     return 0.0;
   }
 
-  std::tuple<double, double> CalculateGradient(const std::vector<MultivariateCoordinate> &multivariate_coordinates)
+  std::tuple<std::pair<double, double>, double> CalculateGradientAndYIntercept(const std::vector<MultivariateCoordinate> &mc)
   {
-    return std::make_pair(0.0, 0.0);
-  }
-
-  double CalculateYIntercept(const std::vector<MultivariateCoordinate> &multivariate_coordinates, const std::tuple<double, double> gradient)
-  {
-    return 0.0;
+    return std::make_tuple(std::make_pair(0.0, 0.0), 0.0);
   }
 }

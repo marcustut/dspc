@@ -48,8 +48,14 @@ namespace DSPC::LinearRegression
     if ((this->type == Type::Normal && coordinates.empty()) || (this->type == Type::Multivariate && multivariate_coordinates.empty()))
       throw std::logic_error(std::string("coordinates are empty"));
 
-    this->CalculateGradient();
-    this->CalculateYIntercept();
+    // calculate gradient and y-intercept based on the type
+    if (this->type == Type::Normal)
+    {
+      this->CalculateGradient();
+      this->CalculateYIntercept();
+    }
+    else
+      this->CalculateGradientAndYIntercept();
   }
 
   void LeastSquare::CalculateGradient()
@@ -57,18 +63,12 @@ namespace DSPC::LinearRegression
     switch (this->technique)
     {
     case Technique::Serial:
-      if (this->type == Type::Normal)
-        this->m = Serial::CalculateGradient(this->coordinates);
-      else
-        std::tie(this->b1, this->b2) = Serial::CalculateGradient(this->multivariate_coordinates);
+      this->m = Serial::CalculateGradient(this->coordinates);
       break;
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
-      if (this->type == Type::Normal)
-        this->m = Pthread::CalculateGradient(this->coordinates);
-      else
-        std::tie(this->b1, this->b2) = Pthread::CalculateGradient(this->multivariate_coordinates);
+      this->m = Pthread::CalculateGradient(this->coordinates);
       break;
     case Technique::CppStdLib:
       break;
@@ -82,18 +82,31 @@ namespace DSPC::LinearRegression
     switch (this->technique)
     {
     case Technique::Serial:
-      if (this->type == Type::Normal)
-        this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
-      else
-        this->a = Serial::CalculateYIntercept(this->multivariate_coordinates, std::make_tuple(b1, b2));
+      this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::OpenMP:
       break;
     case Technique::Pthread:
-      if (this->type == Type::Normal)
-        this->c = Pthread::CalculateYIntercept(this->coordinates, this->m);
-      else
-        this->a = Pthread::CalculateYIntercept(this->multivariate_coordinates, std::make_tuple(b1, b2));
+      this->c = Pthread::CalculateYIntercept(this->coordinates, this->m);
+      break;
+    case Technique::CppStdLib:
+      break;
+    case Technique::CUDA:
+      break;
+    }
+  }
+
+  void LeastSquare::CalculateGradientAndYIntercept()
+  {
+    switch (this->technique)
+    {
+    case Technique::Serial:
+      std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = Serial::CalculateGradientAndYIntercept(this->multivariate_coordinates);
+      break;
+    case Technique::OpenMP:
+      break;
+    case Technique::Pthread:
+      std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = Pthread::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CppStdLib:
       break;
@@ -117,7 +130,7 @@ namespace DSPC::LinearRegression
     return (Coordinate){X, (this->m * X) + this->c};
   }
 
-  MultivariateCoordinate LeastSquare::PredictY(std::vector<double> Xs)
+  MultivariateCoordinate LeastSquare::PredictY(std::array<double, 2> Xs)
   {
     // x = (y - c) / m
     return MultivariateCoordinate{};
@@ -125,6 +138,9 @@ namespace DSPC::LinearRegression
 
   std::string LeastSquare::Formula()
   {
-    return "y = " + std::to_string(this->m) + "x + " + std::to_string(this->c);
+    if (this->type == Type::Normal)
+      return "y = " + std::to_string(this->m) + "x + " + std::to_string(this->c);
+    else
+      return "y = " + std::to_string(this->b1) + "x₁ + " + std::to_string(this->b2) + "x₂ + " + std::to_string(this->a);
   }
 } // namespace DSPC

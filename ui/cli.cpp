@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <fmt/ranges.h>
 
-#include "core/linear_regression/serial.h"
+#include "core/linear_regression/least_square.h"
 
 namespace DSPC::UI
 {
@@ -21,7 +21,9 @@ namespace DSPC::UI
         (MultivariateCoordinate){{19, 18}, 4000},
     };
 
-    auto res = DSPC::LinearRegression::Serial::CalculateGradient(coords);
-    fmt::print("{}\n", res);
+    auto linreg = new DSPC::LinearRegression::LeastSquare(DSPC::Technique::Serial, DSPC::Type::Multivariate, coords);
+    linreg->InitModel();
+
+    fmt::print("{}\n", linreg->Formula());
   }
 }

@@ -12,45 +12,14 @@ namespace DSPC::LinearRegression::Serial
         // num of coordinate
         int n = coordinates.size();
 
-        // sum of x*y
-        std::vector<double> vec_xy;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_xy),
-            [](Coordinate c)
-            { return c.x * c.y; });
-        double sum_xy = std::accumulate(vec_xy.begin(), vec_xy.end(), 0.0);
-
-        // sum of x
-        std::vector<double> vec_x;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_x),
-            [](Coordinate c)
-            { return c.x; });
-        double sum_x = std::accumulate(vec_x.begin(), vec_x.end(), 0.0);
-
-        // sum of y
-        std::vector<double> vec_y;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_y),
-            [](Coordinate c)
-            { return c.y; });
-        double sum_y = std::accumulate(vec_y.begin(), vec_y.end(), 0.0);
-
-        // sum of x*x
-        std::vector<double> vec_xx;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_xx),
-            [](Coordinate c)
-            { return c.x * c.x; });
-        double sum_xx = std::accumulate(vec_xx.begin(), vec_xx.end(), 0.0);
+        double sum_xy = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                        { return pv + c.x * c.y; });
+        double sum_x = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                       { return pv + c.x; });
+        double sum_y = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                       { return pv + c.y; });
+        double sum_xx = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                        { return pv + std::pow(c.x, 2); });
 
         return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
     }
@@ -60,30 +29,15 @@ namespace DSPC::LinearRegression::Serial
         // num of coordinates
         int n = coordinates.size();
 
-        // sum of y
-        std::vector<double> vec_y;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_y),
-            [](Coordinate c)
-            { return c.y; });
-        double sum_y = std::accumulate(vec_y.begin(), vec_y.end(), 0.0);
-
-        // sum of x
-        std::vector<double> vec_x;
-        std::transform(
-            coordinates.begin(),
-            coordinates.end(),
-            std::back_inserter(vec_x),
-            [](Coordinate c)
-            { return c.x; });
-        double sum_x = std::accumulate(vec_x.begin(), vec_x.end(), 0.0);
+        double sum_y = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                       { return pv + c.y; });
+        double sum_x = std::accumulate(coordinates.begin(), coordinates.end(), 0.0, [](double pv, Coordinate c)
+                                       { return pv + c.x; });
 
         return (1 / (double)n) * (sum_y - gradient * sum_x);
     }
 
-    std::tuple<double, double> CalculateGradient(const std::vector<MultivariateCoordinate> &mc)
+    std::tuple<std::pair<double, double>, double> CalculateGradientAndYIntercept(const std::vector<MultivariateCoordinate> &mc)
     {
         // num of coordinate
         int n = mc.size();
@@ -129,10 +83,6 @@ namespace DSPC::LinearRegression::Serial
 
         double a = mean_y - (b1 * mean_x1) - (b2 * mean_x2);
 
-        return std::make_tuple(b1, b2);
-    }
-    double CalculateYIntercept(const std::vector<MultivariateCoordinate> &mc, const std::tuple<double, double> gradient)
-    {
-        return 0.0;
+        return std::make_tuple(std::make_pair(b1, b2), a);
     }
 }
