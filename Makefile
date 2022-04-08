@@ -25,8 +25,9 @@ UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
-CXXFLAGS += -g -Wall -Wformat --std=c++17 
-LIBS = -lsqlite3 -lfmt
+# CXXFLAGS += -g -Wall -Wformat --std=c++17 
+CXXFLAGS += -g -Wall -fopenmp
+LIBS = -lsqlite3
 
 ##---------------------------------------------------------------------
 ## OPENGL ES

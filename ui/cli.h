@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "core/player_data.h"
+#include "core/technique.h"
 
 namespace DSPC::UI
 {
@@ -13,5 +14,5 @@ namespace DSPC::UI
   };
 
   // Utility
-  void RenderCLI(CLIState *state);
+  void RenderCLI(CLIState *state, DSPC::Technique technique);
 }

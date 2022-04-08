@@ -82,7 +82,7 @@ namespace DSPC
 
     // auto lin_reg = LinearRegression::LeastSquare(technique, coordinates);
 
-    DSPC::UI::RenderCLI(&this->cli_state);
+    DSPC::UI::RenderCLI(&this->cli_state, technique);
   }
 
   void Application::RunGUI(Technique technique)
