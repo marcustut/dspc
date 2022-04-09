@@ -71,6 +71,7 @@ namespace DSPC::LinearRegression
       this->m = Serial::CalculateGradient(this->coordinates);
       break;
     case Technique::OpenMP:
+      this->m = OpenMP::CalculateGradient(this->coordinates);
       break;
     case Technique::Pthread:
       this->m = Pthread::CalculateGradient(this->coordinates);
@@ -91,6 +92,7 @@ namespace DSPC::LinearRegression
       this->c = Serial::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::OpenMP:
+      this->c = OpenMP::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::Pthread:
       this->c = Pthread::CalculateYIntercept(this->coordinates, this->m);
@@ -111,6 +113,7 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = Serial::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::OpenMP:
+      std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = OpenMP::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::Pthread:
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = Pthread::CalculateGradientAndYIntercept(this->multivariate_coordinates);
@@ -119,6 +122,7 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CppStdLib::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CUDA:
+
       break;
     }
   }

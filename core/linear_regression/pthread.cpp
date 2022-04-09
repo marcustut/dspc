@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <numeric>
+#include <functional>
 #include <pthread.h>
 
 // maximum number of threads

@@ -25,7 +25,7 @@ UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
-CXXFLAGS += -g -Wall -Wformat --std=c++17 
+CXXFLAGS += -g -Wall -fopenmp -Wformat --std=c++17 
 LIBS = -lsqlite3
 
 ##---------------------------------------------------------------------
@@ -55,6 +55,7 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	#LIBS += -lglfw3
 	LIBS += -lglfw -lfmt
 
+	CXX = /opt/homebrew/Cellar/llvm/13.0.1_1/bin/clang++
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)
 endif
