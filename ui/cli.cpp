@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
-#include <fmt/ranges.h>
 
 #include "core/linear_regression/least_square.h"
 #include "util/csv.h"
@@ -19,15 +18,15 @@ std::vector<DSPC::MultivariateCoordinate> read_mock_data(const char *filepath)
   double points, assists, salary;
 
   // read all rows
-  // while (in.read_row(name, points, skill, assists, salary))
-  //   data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
+  while (in.read_row(name, points, skill, assists, salary))
+    data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
 
   // read 10k rows
-  for (int i = 0; i < 10000; i++)
-  {
-    in.read_row(name, points, skill, assists, salary);
-    data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
-  }
+  // for (int i = 0; i < 100000; i++)
+  // {
+  //   in.read_row(name, points, skill, assists, salary);
+  //   data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
+  // }
 
   return data;
 }
@@ -58,6 +57,6 @@ namespace DSPC::UI
     auto linreg = new DSPC::LinearRegression::LeastSquare(technique, DSPC::Type::Multivariate, read_mock_data("dataset/mock.csv"));
     linreg->InitModel();
 
-    fmt::print("{}\n", linreg->Formula());
+    std::cout << linreg->Formula() << std::endl;
   }
 }

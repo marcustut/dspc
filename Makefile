@@ -26,7 +26,7 @@ LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
 CXXFLAGS += -g -Wall -Wformat --std=c++17 
-LIBS = -lsqlite3 -lfmt
+LIBS = -lsqlite3
 
 ##---------------------------------------------------------------------
 ## OPENGL ES
@@ -53,7 +53,7 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 	LIBS += -L/usr/local/lib -L/opt/homebrew/lib
 	#LIBS += -lglfw3
-	LIBS += -lglfw
+	LIBS += -lglfw -lfmt
 
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)

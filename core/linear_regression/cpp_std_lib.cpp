@@ -3,7 +3,6 @@
 #include <thread>
 #include <future>
 #include <numeric>
-#include <fmt/core.h>
 
 #include "cpp_std_lib.h"
 
