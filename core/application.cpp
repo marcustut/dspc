@@ -7,7 +7,6 @@
 #include "core/entity/player_salary.h"
 #include "core/entity/player_attributes.h"
 #include "core/player_data.h"
-#include "util/time.h"
 
 using namespace sqlite_orm;
 
@@ -60,8 +59,6 @@ namespace DSPC
       this->cli_state.players.push_back(PlayerData{*std::get<0>(row), *std::get<1>(row), *std::get<2>(row), *std::get<3>(row), *std::get<4>(row)});
       this->gui_state.players.push_back(PlayerData{*std::get<0>(row), *std::get<1>(row), *std::get<2>(row), *std::get<3>(row), *std::get<4>(row)});
     }
-
-    std::cout << "[DEBUG] " << this->gui_state.players.size() << " player's data are loaded." << '\n';
   }
 
   // destructor for the Application class
@@ -69,20 +66,7 @@ namespace DSPC
 
   void Application::RunCLI(Technique technique)
   {
-    auto timer = DSPC::Util::Timer("RunCLI");
-
-    // std::vector<Coordinate> coordinates;
-
-    // std::transform(
-    //     this->cli_state.players.begin(),
-    //     this->cli_state.players.end(),
-    //     std::back_inserter(coordinates),
-    //     [](PlayerData p)
-    //     { return Coordinate{p.points, p.salary}; });
-
-    // auto lin_reg = LinearRegression::LeastSquare(technique, coordinates);
-
-    DSPC::UI::RenderCLI(&this->cli_state);
+    DSPC::UI::RenderCLI(&this->cli_state, technique);
   }
 
   void Application::RunGUI(Technique technique)

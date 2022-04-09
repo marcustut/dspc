@@ -4,7 +4,10 @@
 #include <stdexcept>
 
 #include "core/linear_regression/serial.h"
+#include "core/linear_regression/open_mp.h"
 #include "core/linear_regression/pthread.h"
+#include "core/linear_regression/cpp_std_lib.h"
+#include "util/time.h"
 
 namespace DSPC::LinearRegression
 {
@@ -44,6 +47,8 @@ namespace DSPC::LinearRegression
 
   void LeastSquare::InitModel()
   {
+    auto timer = DSPC::Util::Timer("InitModel");
+
     // check if coordinates are set
     if ((this->type == Type::Normal && coordinates.empty()) || (this->type == Type::Multivariate && multivariate_coordinates.empty()))
       throw std::logic_error(std::string("coordinates are empty"));
@@ -109,6 +114,7 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = Pthread::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CppStdLib:
+      std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CppStdLib::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CUDA:
       break;
