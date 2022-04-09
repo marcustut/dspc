@@ -14,7 +14,7 @@
 # Make does not offer a recursive wildcard function, so here's one:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
-CXX = llvm-g++
+#CXX = g++
 #CXX = clang++
 
 EXE = main
@@ -55,6 +55,7 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	#LIBS += -lglfw3
 	LIBS += -lglfw -lfmt
 
+	CXX = /opt/homebrew/Cellar/llvm/13.0.1_1/bin/clang++
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)
 endif
