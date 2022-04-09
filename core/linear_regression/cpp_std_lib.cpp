@@ -3,7 +3,8 @@
 #include <thread>
 #include <future>
 #include <numeric>
-
+#include <algorithm>
+#include <cmath>
 #include "cpp_std_lib.h"
 
 void calculate_wrapper(std::promise<double> &&p, const std::vector<DSPC::Coordinate> &c, std::function<double(const std::vector<DSPC::Coordinate> &)> callback)

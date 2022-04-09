@@ -251,25 +251,25 @@ double CalculateGradient(const std::vector<Coordinate> &coordinates)
     return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
 }
 
-double CalculateMultiGradient(const std::vector<Coordinate> &coordinates)
-{
-    int n = coordinates.size();
-    const Coordinate *coord = &coordinates[0];
+// double CalculateMultiGradient(const std::vector<Coordinate> &coordinates)
+// {
+//     int n = coordinates.size();
+//     const Coordinate *coord = &coordinates[0];
 
-    // Calculate mean_x
-    double vec_x[ARR_SIZE];
-    pushBackWithCuda(coord, vec_x, n, SumX);
-    double sum_x = accumulate(sum_x, n, vec_x);
-    double mean_x = sum_x / n;
+//     // Calculate mean_x
+//     double vec_x[ARR_SIZE];
+//     pushBackWithCuda(coord, vec_x, n, SumX);
+//     double sum_x = accumulate(sum_x, n, vec_x);
+//     double mean_x = sum_x / n;
 
-    // Calculate mean_y
-    double vec_y[ARR_SIZE];
-    pushBackWithCuda(coord, vec_y, n, SumY);
-    double sum_y = accumulate(sum_y, n, vec_y);
-    double mean_y = sum_y / n;
+//     // Calculate mean_y
+//     double vec_y[ARR_SIZE];
+//     pushBackWithCuda(coord, vec_y, n, SumY);
+//     double sum_y = accumulate(sum_y, n, vec_y);
+//     double mean_y = sum_y / n;
 
-    // ???????? mind block
-}
+//     // ???????? mind block
+// }
 
 double CalculateYIntercept(const std::vector<Coordinate> &coordinates, const double gradient)
 {

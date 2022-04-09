@@ -1,5 +1,6 @@
 #include "pthread.h"
 
+#include <functional>
 #include <iostream>
 #include <pthread.h>
 
