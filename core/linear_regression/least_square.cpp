@@ -145,8 +145,8 @@ namespace DSPC::LinearRegression
 
   MultivariateCoordinate LeastSquare::PredictY(std::array<double, 2> Xs)
   {
-    // x = (y - c) / m
-    return MultivariateCoordinate{};
+    // y = b1(x1) + b2(x2) - a
+    return MultivariateCoordinate{Xs, (Xs[0] * this->b1) + (Xs[1] * this->b2) - this->a};
   }
 
   std::string LeastSquare::Formula()
