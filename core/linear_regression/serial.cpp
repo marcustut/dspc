@@ -3,7 +3,6 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
-// #include <fmt/core.h>
 
 namespace DSPC::LinearRegression::Serial
 {
