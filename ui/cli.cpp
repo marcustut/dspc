@@ -17,16 +17,16 @@ std::vector<DSPC::MultivariateCoordinate> read_mock_data(const char *filepath)
   std::string name, skill;
   double points, assists, salary;
 
-  // read all rows 160k
-  // while (in.read_row(name, points, skill, assists, salary))
-  //   data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
+  // read all rows
+  while (in.read_row(name, points, skill, assists, salary))
+    data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
 
   // read 10k rows
-  for (int i = 0; i < 160000; i++)
-  {
-    in.read_row(name, points, skill, assists, salary);
-    data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
-  }
+  // for (int i = 0; i < 100000; i++)
+  // {
+  //   in.read_row(name, points, skill, assists, salary);
+  //   data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
+  // }
 
   return data;
 }
