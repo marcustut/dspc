@@ -1,6 +1,7 @@
 #include "pthread.h"
 
 #include <iostream>
+#include <numeric>
 #include <pthread.h>
 
 // maximum number of threads
@@ -8,29 +9,32 @@
 
 struct calculate_wrapper_args
 {
-  std::vector<DSPC::Coordinate> &coordinates;
-  std::function<double(std::vector<DSPC::Coordinate> &)> callback;
+  const std::vector<DSPC::Coordinate> &coordinates;
+  std::function<double(const std::vector<DSPC::Coordinate> &)> callback;
 };
 
-// void *calculate_wrapper(void *args)
-// {
-//   auto c = ((calculate_wrapper_args *)args)->coordinates;
-//   auto callback = ((calculate_wrapper_args *)args)->callback;
-//   return static_cast<void *>(&callback(c));
-// }
+void *calculate_wrapper(void *args)
+{
+  auto c = ((calculate_wrapper_args *)args)->coordinates;
+  auto callback = ((calculate_wrapper_args *)args)->callback;
+  double result = callback(c);
+  return static_cast<void *>(&result);
+}
 
 struct calculate_multivariate_wrapper_args
 {
-  std::vector<DSPC::MultivariateCoordinate> &coordinates;
-  std::function<double(std::vector<DSPC::MultivariateCoordinate> &)> callback;
+  const std::vector<DSPC::MultivariateCoordinate> &coordinates;
+  std::function<double(const std::vector<DSPC::MultivariateCoordinate> &)> callback;
 };
 
-// void *calculate_multivariate_wrapper(void *args)
-// {
-//   auto mc = ((calculate_multivariate_wrapper_args *)args)->coordinates;
-//   auto callback = ((calculate_multivariate_wrapper_args *)args)->callback;
-//   return static_cast<void *>(&callback(mc));
-// }
+void *calculate_multivariate_wrapper(void *args)
+{
+  auto mc = ((calculate_multivariate_wrapper_args *)args)->coordinates;
+  auto callback = ((calculate_multivariate_wrapper_args *)args)->callback;
+  double result = callback(mc);
+  std::cout << "result: " << result << std::endl;
+  return static_cast<void *>(&result);
+}
 
 namespace DSPC::LinearRegression::Pthread
 {
@@ -95,54 +99,58 @@ namespace DSPC::LinearRegression::Pthread
 
   std::tuple<std::pair<double, double>, double> CalculateGradientAndYIntercept(const std::vector<MultivariateCoordinate> &mc)
   {
-    // pthread_t threads[8];
+    pthread_t threads[8];
 
-    // double sum_of_x1, sum_of_x2, sum_of_y;
+    double sum_of_x1 = 0, sum_of_x2 = 0, sum_of_y = 0;
 
-    // auto calculate_sum_of_x1_callback = [](const std::vector<MultivariateCoordinate> &mc)
-    // { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
-    //                          { return pv + c.xs[0]; }); };
-    // auto calculate_sum_of_x2_callback = [](const std::vector<MultivariateCoordinate> &mc)
-    // { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
-    //                          { return pv + c.xs[1]; }); };
-    // auto calculate_sum_of_y_callback = [](const std::vector<MultivariateCoordinate> &mc)
-    // { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
-    //                          { return pv + c.y; }); };
+    auto calculate_sum_of_x1_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
+                             { return pv + c.xs[0]; }); };
+    auto calculate_sum_of_x2_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
+                             { return pv + c.xs[1]; }); };
+    auto calculate_sum_of_y_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
+                             { return pv + c.y; }); };
 
-    // calculate_multivariate_wrapper_args *args1 = new calculate_multivariate_wrapper_args{
-    //     mc, calculate_sum_of_x1_callback};
-    // calculate_multivariate_wrapper_args *args2 = new calculate_multivariate_wrapper_args{
-    //     mc, calculate_sum_of_x2_callback};
-    // calculate_multivariate_wrapper_args *args3 = new calculate_multivariate_wrapper_args{
-    //     mc, calculate_sum_of_y_callback};
+    calculate_multivariate_wrapper_args *args1 = new calculate_multivariate_wrapper_args{
+        mc, calculate_sum_of_x1_callback};
+    calculate_multivariate_wrapper_args *args2 = new calculate_multivariate_wrapper_args{
+        mc, calculate_sum_of_x2_callback};
+    calculate_multivariate_wrapper_args *args3 = new calculate_multivariate_wrapper_args{
+        mc, calculate_sum_of_y_callback};
 
-    // if (pthread_create(&threads[0], nullptr, calculate_multivariate_wrapper, args1) != 0)
-    //   perror("failed to create thread 1");
-    // delete args1;
+    if (pthread_create(&threads[0], nullptr, calculate_multivariate_wrapper, args1) != 0)
+      perror("failed to create thread 1");
 
     // if (pthread_create(&threads[1], nullptr, calculate_multivariate_wrapper, args2) != 0)
     //   perror("failed to create thread 2");
-    // delete args2;
 
     // if (pthread_create(&threads[2], nullptr, calculate_multivariate_wrapper, args3) != 0)
     //   perror("failed to create thread 3");
-    // delete args3;
 
-    // double *r = new double();
+    double *r = new double();
+    int ret = pthread_join(threads[0], (void **)&r);
+    if (ret != 0)
+      perror("failed to join thread");
+    printf("sum_of_x1: %f\n", r);
+    // delete r;
 
     // if (pthread_join(threads[0], (void **)&r) != 0)
     //   perror("failed to join thread");
     // sum_of_x1 = *r;
 
-    // if (pthread_join(threads[0], (void **)&r) != 0)
+    // if (pthread_join(threads[1], (void **)&r) != 0)
     //   perror("failed to join thread");
     // sum_of_x2 = *r;
 
-    // if (pthread_join(threads[0], (void **)&r) != 0)
+    // if (pthread_join(threads[2], (void **)&r) != 0)
     //   perror("failed to join thread");
     // sum_of_y = *r;
 
-    // delete r;
+    std::cout << "sum_of_x1: " << sum_of_x1 << std::endl;
+    std::cout << "sum_of_x2: " << sum_of_x2 << std::endl;
+    std::cout << "sum_of_y: " << sum_of_y << std::endl;
 
     return std::make_tuple(std::make_pair(0.0, 0.0), 0.0);
   }
