@@ -26,7 +26,7 @@ namespace DSPC
     void RunGUI(Technique technique);
 
   public:
-    Application(std::string db_path);
+    Application(std::string file_path, int *num_of_rows);
     ~Application();
     void Run(ApplicationType type, Technique technique);
   };
