@@ -7,10 +7,7 @@
 #include "core/entity/player_salary.h"
 #include "core/entity/player_attributes.h"
 #include "core/player_data.h"
-<<<<<<< HEAD
-=======
 #include "util/csv.h"
->>>>>>> 8438b5b13e5b32cb4da43e81e51d9fb6bfa51ee2
 
 using namespace sqlite_orm;
 
