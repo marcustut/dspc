@@ -19,6 +19,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include "core/player_data.h"
+#include "core/csv_data.h"
 
 namespace DSPC::UI
 {
@@ -34,6 +35,7 @@ namespace DSPC::UI
     bool show_sequential_window;
     bool show_parallel_window;
     std::vector<DSPC::PlayerData> players;
+    std::vector<DSPC::CSVData> mocks;
   };
 
   // Utility
