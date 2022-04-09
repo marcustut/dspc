@@ -76,11 +76,19 @@ namespace DSPC::LinearRegression::Serial
                                                        { return pv + val; });
         result.clear();
 
+        double sum_of_products_x1_x2_2 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                                                         { return pv + (c.xs[0] - mean_x1) * (c.y - mean_y); });
+
         double b1 = (sum_of_products_x1_y * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x2_y) / (sum_of_squares_x1 * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x1_x2);
 
         double b2 = (sum_of_products_x2_y * sum_of_squares_x1 - sum_of_products_x1_x2 * sum_of_products_x1_y) / (sum_of_squares_x1 * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x1_x2);
 
         double a = mean_y - (b1 * mean_x1) - (b2 * mean_x2);
+
+        std::cout << "sum_of_products_x1_y: " << sum_of_products_x1_y << std::endl;
+        std::cout << "sum_of_products_x2_y: " << sum_of_products_x2_y << std::endl;
+        std::cout << "sum_of_products_x1_x2: " << sum_of_products_x1_x2 << std::endl;
+        std::cout << "sum_of_products_x1_x2_2: " << sum_of_products_x1_x2_2 << std::endl;
 
         return std::make_tuple(std::make_pair(b1, b2), a);
     }

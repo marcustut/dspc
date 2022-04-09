@@ -22,11 +22,11 @@ std::vector<DSPC::MultivariateCoordinate> read_mock_data(const char *filepath)
     data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
 
   // read 10k rows
-  // for (int i = 0; i < 100000; i++)
-  // {
-  //   in.read_row(name, points, skill, assists, salary);
-  //   data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
-  // }
+  for (int i = 0; i < 500; i++)
+  {
+    in.read_row(name, points, skill, assists, salary);
+    data.push_back((DSPC::MultivariateCoordinate){{points, assists}, salary});
+  }
 
   return data;
 }

@@ -11,6 +11,8 @@
 #include <vector>
 #include <numeric>
 #include <algorithm>
+#include <functional>
+#include <iostream>
 #include <stdio.h>
 
 const unsigned int ARR_SIZE = 1024;
@@ -90,6 +92,7 @@ cudaError_t operateWithCuda(const Coordinate *coordinates, double *vector, unsig
     }
 
     // Launch a kernel on the GPU with one thread for each element
+    // operateKernel<<<1, size>>>(dev_coord, dev_vec, mean, op);
     operateKernel<<<1, size>>>(dev_coord, dev_vec, mean, op);
 
     // Check for any errors launching the kernel
