@@ -6,6 +6,40 @@
 #include <algorithm>
 #include <math.h>
 
+#define NUM_OF_THREADS 2
+
+double sum_coord_vector(const std::vector<DSPC::Coordinate> &arr, int start, int stop, std::function<double(double, DSPC::Coordinate)> callback)
+{
+  return std::accumulate(arr.begin() + start, arr.begin() + stop, 0.0, callback);
+}
+
+double sum_multi_coord_vector(const std::vector<DSPC::MultivariateCoordinate> &arr, int start, int stop, std::function<double(double, DSPC::MultivariateCoordinate)> callback)
+{
+  return std::accumulate(arr.begin() + start, arr.begin() + stop, 0.0, callback);
+}
+
+double parallel_accumulation_coord(const std::vector<DSPC::Coordinate> &arr, int num_of_threads, std::function<double(double, DSPC::Coordinate)> callback)
+{
+  std::vector<std::future<double>> futures;
+  double sum = 0.0;
+  for (int i = 0; i < num_of_threads; i++)
+    futures.push_back(std::async(&sum_coord_vector, arr, i * arr.size() / num_of_threads, (i + 1) * (arr.size() / num_of_threads), callback));
+  for (int i = 0; i < futures.size(); i++)
+    sum += futures[i].get();
+  return sum;
+}
+
+double parallel_accumulation_multi_coord(const std::vector<DSPC::MultivariateCoordinate> &arr, int num_of_threads, std::function<double(double, DSPC::MultivariateCoordinate)> callback)
+{
+  std::vector<std::future<double>> futures;
+  double sum = 0.0;
+  for (int i = 0; i < num_of_threads; i++)
+    futures.push_back(std::async(&sum_multi_coord_vector, arr, i * arr.size() / num_of_threads, (i + 1) * (arr.size() / num_of_threads), callback));
+  for (int i = 0; i < futures.size(); i++)
+    sum += futures[i].get();
+  return sum;
+}
+
 void calculate_wrapper(std::promise<double> &&p, const std::vector<DSPC::Coordinate> &c, std::function<double(const std::vector<DSPC::Coordinate> &)> callback)
 {
   p.set_value(callback(c));
@@ -33,8 +67,8 @@ namespace DSPC::LinearRegression::CppStdLib
     auto future_sum_of_xx = promise_sum_of_xx.get_future();
 
     auto calculate_sum_of_xy_callback = [](const std::vector<Coordinate> &coord)
-    { return std::accumulate(coord.begin(), coord.end(), 0.0, [](double pv, Coordinate c)
-                             { return pv + c.x * c.y; }); };
+    { return parallel_accumulation_coord(coord, NUM_OF_THREADS, [](double pv, Coordinate c)
+                                         { return pv + c.x * c.y; }); };
     auto calculate_sum_of_x_callback = [](const std::vector<Coordinate> &coord)
     { return std::accumulate(coord.begin(), coord.end(), 0.0, [](double pv, Coordinate c)
                              { return pv + c.x; }); };
@@ -112,6 +146,15 @@ namespace DSPC::LinearRegression::CppStdLib
     auto calculate_sum_of_y_callback = [](const std::vector<MultivariateCoordinate> &mc)
     { return std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                              { return pv + c.y; }); };
+    // auto calculate_sum_of_x1_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [](double pv, MultivariateCoordinate c)
+    //                                            { return pv + c.xs[0]; }); };
+    // auto calculate_sum_of_x2_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [](double pv, MultivariateCoordinate c)
+    //                                            { return pv + c.xs[1]; }); };
+    // auto calculate_sum_of_y_callback = [](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [](double pv, MultivariateCoordinate c)
+    //                                            { return pv + c.y; }); };
 
     std::thread t1(&calculate_multivariate_wrapper, std::move(promise_sum_of_x1), mc, calculate_sum_of_x1_callback);
     std::thread t2(&calculate_multivariate_wrapper, std::move(promise_sum_of_x2), mc, calculate_sum_of_x2_callback);
@@ -146,30 +189,30 @@ namespace DSPC::LinearRegression::CppStdLib
     auto calculate_sum_of_squares_x2_callback = [&](const std::vector<MultivariateCoordinate> &mc)
     { return std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
                              { return pv + std::pow(c.xs[1] - mean_x2, 2); }); };
+    // auto calculate_sum_of_squares_x1_callback = [&](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [&](double pv, MultivariateCoordinate c)
+    //                                            { return pv + std::pow(c.xs[0] - mean_x1, 2); }); };
+    // auto calculate_sum_of_squares_x2_callback = [&](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [&](double pv, MultivariateCoordinate c)
+    //                                            { return pv + std::pow(c.xs[1] - mean_x2, 2); }); };
     auto calculate_sum_of_products_x1_y = [&](const std::vector<MultivariateCoordinate> &mc)
-    {
-      std::vector<double> result;
-      std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                     { return (a.xs[0] - mean_x1) * (b.y - mean_y); });
-      return std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                             { return pv + val; });
-    };
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                             { return pv + (c.xs[0] - mean_x1) * (c.y - mean_y); }); };
     auto calculate_sum_of_products_x2_y = [&](const std::vector<MultivariateCoordinate> &mc)
-    {
-      std::vector<double> result;
-      std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                     { return (a.xs[1] - mean_x2) * (b.y - mean_y); });
-      return std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                             { return pv + val; });
-    };
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                             { return pv + (c.xs[1] - mean_x2) * (c.y - mean_y); }); };
     auto calculate_sum_of_products_x1_x2 = [&](const std::vector<MultivariateCoordinate> &mc)
-    {
-      std::vector<double> result;
-      std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                     { return (a.xs[0] - mean_x1) * (b.xs[1] - mean_x2); });
-      return std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                             { return pv + val; });
-    };
+    { return std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                             { return pv + (c.xs[0] - mean_x1) * (c.xs[1] - mean_x2); }); };
+    // auto calculate_sum_of_products_x1_y = [&](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [&](double pv, MultivariateCoordinate c)
+    //                                            { return pv + (c.xs[0] - mean_x1) * (c.y - mean_y); }); };
+    // auto calculate_sum_of_products_x2_y = [&](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [&](double pv, MultivariateCoordinate c)
+    //                                            { return pv + (c.xs[1] - mean_x2) * (c.y - mean_y); }); };
+    // auto calculate_sum_of_products_x1_x2 = [&](const std::vector<MultivariateCoordinate> &mc)
+    // { return parallel_accumulation_multi_coord(mc, NUM_OF_THREADS, [&](double pv, MultivariateCoordinate c)
+    //                                            { return pv + (c.xs[0] - mean_x1) * (c.xs[1] - mean_x2); }); };
 
     std::thread t4(&calculate_multivariate_wrapper, std::move(promise_sum_of_squares_x1), mc, calculate_sum_of_squares_x1_callback);
     std::thread t5(&calculate_multivariate_wrapper, std::move(promise_sum_of_squares_x2), mc, calculate_sum_of_squares_x2_callback);

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "core/linear_regression/serial.h"
-#include "core/linear_regression/open_mp.hpp"
+#include "core/linear_regression/open_mp.h"
 #include "core/linear_regression/pthread.h"
 #include "core/linear_regression/cpp_std_lib.h"
 #include "core/linear_regression/cuda.cuh"

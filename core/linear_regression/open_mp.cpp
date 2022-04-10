@@ -24,7 +24,6 @@ namespace DSPC::LinearRegression::OpenMP
                                     { return pv + std::pow(c.x, 2); });
 
     return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
-    // return 0.0;
   }
 
   double CalculateYIntercept(const std::vector<Coordinate> &coordinates, const double gradient)
@@ -38,7 +37,6 @@ namespace DSPC::LinearRegression::OpenMP
                                    { return pv + c.x; });
 
     return (1 / (double)n) * (sum_y - gradient * sum_x);
-    // return 1.1;
   }
 
   std::tuple<std::pair<double, double>, double> CalculateGradientAndYIntercept(const std::vector<MultivariateCoordinate> &mc)
