@@ -122,7 +122,6 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CppStdLib::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CUDA:
-
       break;
     }
   }
