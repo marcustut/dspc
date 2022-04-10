@@ -11,7 +11,7 @@ namespace DSPC
     double x, y;
   };
 
-  // MultivariateCoordinate represents the ((x1, x2, x3, ...),y) value
+  // MultivariateCoordinate represents the ((x1, x2),y) value
   // of a specific coordinate in 2D space.
   struct MultivariateCoordinate
   {

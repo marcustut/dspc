@@ -4,9 +4,10 @@
 #include <stdexcept>
 
 #include "core/linear_regression/serial.h"
-#include "core/linear_regression/open_mp.h"
+#include "core/linear_regression/open_mp.hpp"
 #include "core/linear_regression/pthread.h"
 #include "core/linear_regression/cpp_std_lib.h"
+#include "core/linear_regression/cuda.cuh"
 #include "util/time.h"
 
 namespace DSPC::LinearRegression
@@ -77,8 +78,10 @@ namespace DSPC::LinearRegression
       this->m = Pthread::CalculateGradient(this->coordinates);
       break;
     case Technique::CppStdLib:
+      this->m = CppStdLib::CalculateGradient(this->coordinates);
       break;
     case Technique::CUDA:
+      // this->m = CUDA::CalculateGradient(this->coordinates);
       break;
     }
   }
@@ -97,8 +100,10 @@ namespace DSPC::LinearRegression
       this->c = Pthread::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::CppStdLib:
+      this->c = CppStdLib::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::CUDA:
+      // this->c = CUDA::CalculateYIntercept(this->coordinates, this->m);
       break;
     }
   }
@@ -120,7 +125,7 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CppStdLib::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CUDA:
-    
+
       break;
     }
   }

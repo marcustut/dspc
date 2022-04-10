@@ -1,6 +1,8 @@
 #include "pthread.h"
 
+#include <functional>
 #include <iostream>
+#include <functional>
 #include <pthread.h>
 
 // maximum number of threads

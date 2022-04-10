@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <tuple>
-
 #include "core/coordinate.h"
 
 namespace DSPC::LinearRegression::CppStdLib

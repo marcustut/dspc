@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
+#include <iomanip>
 
 #include "core/linear_regression/least_square.h"
 #include "util/csv.h"
@@ -21,28 +22,6 @@ namespace DSPC::UI
       std::transform(state->players.begin(), state->players.end(), std::back_inserter(data), [](PlayerData pd)
                      { return (MultivariateCoordinate){{pd.points, pd.assists}, pd.salary}; });
 
-<<<<<<< HEAD
-    // std::vector<MultivariateCoordinate> data;
-    // std::transform(state->players.begin(), state->players.end(), std::back_inserter(data), [](PlayerData pd)
-    //                { return (MultivariateCoordinate){{pd.points, pd.assists}, pd.salary}; });
-
-    // for (auto &mc : data)
-    //   fmt::print("PTS: {}, ASSISTS: {}, SALARY: {}\n", mc.xs[0], mc.xs[1], mc.y);
-
-    // std::vector<MultivariateCoordinate> coords{
-    //     (MultivariateCoordinate){{7, 8}, 1000},
-    //     (MultivariateCoordinate){{6, 6}, 1789},
-    //     (MultivariateCoordinate){{8, 9}, 2000},
-    //     (MultivariateCoordinate){{9, 8}, 2400},
-    //     (MultivariateCoordinate){{14, 13}, 3800},
-    //     (MultivariateCoordinate){{19, 18}, 4000},
-    // };
-
-    auto linreg = new DSPC::LinearRegression::LeastSquare(technique, DSPC::Type::Multivariate, read_mock_data("dataset/mock.csv"));
-    linreg->InitModel();
-
-    std::cout << linreg->Formula() << std::endl;
-=======
     // print how many coordinates in red
     std::cout << "\033[1;31m[DEBUG] " << data.size() << " coordinate is loaded\033[0m" << std::endl;
 
@@ -63,6 +42,5 @@ namespace DSPC::UI
     MultivariateCoordinate predicted = linreg->PredictY(Xs);
     std::cout << std::fixed << std::setprecision(4);
     std::cout << "\nThe predicted Y value is " << predicted.y << " (4 d.p.)" << std::endl;
->>>>>>> 8438b5b13e5b32cb4da43e81e51d9fb6bfa51ee2
   }
 }
