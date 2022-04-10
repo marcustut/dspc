@@ -3,11 +3,11 @@
 ## User Manual
 
 ### NOT CUDA
-1. Click on the `main.exe` to run this parallelisation program (except `CUDA`).
+1. To run this parallelisation program (except `CUDA`), open the unzipped folder and open the command prompt.
 
 2. Usage:
     ```
-    main <TYPE> <TECHNIQUE> <DATASET> [NUMBER_OF_ROWS]
+    main.exe <TYPE> <TECHNIQUE> <DATASET> [NUMBER_OF_ROWS]
     ```
     Field | Description
     --- | ---
@@ -19,14 +19,14 @@
 3. Enter `2` values of _X_ value to predict salary in 4 d.p.
 
 ### CUDA
-1. Click on the `cuda.exe` to run CUDA parallelisation program.
+1. To run CUDA parallelisation program, open the unzipped folder and open the command prompt.
 
 2. Usage:
    ```
-    CUDA <NUM_OF_ROWS>
+    cuda.exe <NUM_OF_ROWS>
     ```
     Field | Description
     --- | ---
-    NUM_OF_ROWS | Number of rows in the data to be loaded, `CANNOT` exceed 110000
+    NUM_OF_ROWS | Number of rows in the data to be loaded, `CANNOT` exceed 110000. Default is 160000, which will terminate without giving a result.
 
 3. Enter `2` values of _X_ value to predict salary in 4 d.p.
