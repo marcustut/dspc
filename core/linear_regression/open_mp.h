@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-// #include "core/linear_regression/open_mp.hpp"
 #include "core/coordinate.h"
 
 namespace DSPC::LinearRegression::OpenMP

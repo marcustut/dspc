@@ -1,4 +1,4 @@
-#include "open_mp.hpp"
+#include "open_mp.h"
 
 #include <iostream>
 #include <numeric>

@@ -55,6 +55,7 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	#LIBS += -lglfw3
 	LIBS += -lglfw -lfmt
 
+	CXX = /opt/homebrew/Cellar/llvm/13.0.1_1/bin/clang++
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)
 endif
