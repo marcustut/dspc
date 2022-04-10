@@ -7,7 +7,6 @@
 #include "core/linear_regression/open_mp.h"
 #include "core/linear_regression/pthread.h"
 #include "core/linear_regression/cpp_std_lib.h"
-#include "core/linear_regression/cuda.cuh"
 #include "util/time.h"
 
 namespace DSPC::LinearRegression
@@ -81,7 +80,6 @@ namespace DSPC::LinearRegression
       this->m = CppStdLib::CalculateGradient(this->coordinates);
       break;
     case Technique::CUDA:
-      this->m = CUDA::CalculateGradient(this->coordinates);
       break;
     }
   }
@@ -103,7 +101,6 @@ namespace DSPC::LinearRegression
       this->c = CppStdLib::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::CUDA:
-      this->c = CUDA::CalculateYIntercept(this->coordinates, this->m);
       break;
     }
   }
