@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
+#include <iomanip>
 
 #include "core/linear_regression/least_square.h"
 #include "util/csv.h"
