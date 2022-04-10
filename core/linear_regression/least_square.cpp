@@ -81,9 +81,7 @@ namespace DSPC::LinearRegression
       this->m = CppStdLib::CalculateGradient(this->coordinates);
       break;
     case Technique::CUDA:
-#ifndef __NVCC__
       this->m = CUDA::CalculateGradient(this->coordinates);
-#endif
       break;
     }
   }
@@ -105,9 +103,7 @@ namespace DSPC::LinearRegression
       this->c = CppStdLib::CalculateYIntercept(this->coordinates, this->m);
       break;
     case Technique::CUDA:
-#ifndef __NVCC__
       this->c = CUDA::CalculateYIntercept(this->coordinates, this->m);
-#endif
       break;
     }
   }
@@ -129,9 +125,6 @@ namespace DSPC::LinearRegression
       std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CppStdLib::CalculateGradientAndYIntercept(this->multivariate_coordinates);
       break;
     case Technique::CUDA:
-#ifndef __NVCC__
-      std::forward_as_tuple(std::tie(this->b1, this->b2), this->a) = CUDA::CalculateGradientAndYIntercept(this->multivariate_coordinates);
-#endif
       break;
     }
   }

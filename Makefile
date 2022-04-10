@@ -25,7 +25,7 @@ UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I.
-CXXFLAGS += -g -Wall -fopenmp -Wformat --std=c++17 
+CXXFLAGS += -g -Wall -fopenmp -Wformat --std=c++17
 LIBS = -lsqlite3
 
 ##---------------------------------------------------------------------
@@ -51,7 +51,7 @@ endif
 ifeq ($(UNAME_S), Darwin) #APPLE
 	ECHO_MESSAGE = "Mac OS X"
 	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
-	LIBS += -L/usr/local/lib -L/opt/homebrew/lib 
+	LIBS += -L/usr/local/lib -L/opt/homebrew/lib
 	#LIBS += -lglfw3
 	LIBS += -lglfw -lfmt
 
@@ -67,6 +67,12 @@ ifeq ($(OS), Windows_NT) #WINDOWS
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CXXFLAGS += -I "C:/Program Files (x86)/sqlite_orm/include"
 	CFLAGS = $(CXXFLAGS)
+endif
+
+NVCC_RESULT := $(shell which nvcc 2> NULL)
+NVCC_TEST := $(notdir $(NVCC_RESULT))
+ifeq ($(NVCC_TEST),Program NVIDIA GPU Computing nvcc)
+	OBJS += cuda.o
 endif
 
 ##---------------------------------------------------------------------
@@ -101,10 +107,16 @@ $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(EXE) $(OBJS)
+	rm -f $(EXE) $(OBJS) cuda.exe cuda.obj cuda.lib cuda.exp NULL
+
+cuda:
+	nvcc  -o cuda core/linear_regression/cuda.cu -I.
 
 print-sources:
 	@echo $(SOURCES)
+
+print-objs:
+	@echo $(OBJS)
 
 print-compiler:
 	@echo $(CXX)

@@ -3,8 +3,8 @@
 #include <functional>
 #include <iostream>
 #include <numeric>
-#include <functional>
 #include <pthread.h>
+#include <math.h>
 
 #define MAX_THREAD 4
 

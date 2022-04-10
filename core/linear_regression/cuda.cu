@@ -13,8 +13,10 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <iomanip>
 #include <stdio.h>
 #include <array>
+#include "util/csv.h"
 
 static const int ARR_SIZE = 100000;
 static const int BLOCK_SIZE = 1024;
@@ -136,7 +138,7 @@ pushBackKernel(const Coordinate *coord, double *vec, TargetCoordinateOperation o
     int i = threadIdx.x;
     if (op == SumX)
         vec[i] = coord[i].x;
-    else if (op = SumY)
+    else if (op == SumY)
         vec[i] = coord[i].y;
     else if (op == XTimesY)
         vec[i] = coord[i].x * coord[i].y;
@@ -318,6 +320,8 @@ __global__ void calculate_sum(const MultivariateCoordinate *coord, double *out, 
         for (int i = idx; i < ARR_SIZE; i += BLOCK_SIZE)
             sum += coord[i].y;
         break;
+    default:
+        break;
     }
 
     __shared__ double r[BLOCK_SIZE];
@@ -347,6 +351,8 @@ __global__ void calculate_sum(const MultivariateCoordinate *coord, double *out, 
     case SumOfSquaresX2:
         for (int i = idx; i < ARR_SIZE; i += BLOCK_SIZE)
             sum += (coord[i].xs[1] - mean) * (coord[i].xs[1] - mean);
+        break;
+    default:
         break;
     }
 
@@ -381,6 +387,8 @@ __global__ void calculate_sum(const MultivariateCoordinate *coord, double *out, 
     case SumofProductsX1X2:
         for (int i = idx; i < ARR_SIZE; i += BLOCK_SIZE)
             sum += (coord[i].xs[0] - mean1) * (coord[i].xs[1] - mean2);
+        break;
+    default:
         break;
     }
 
@@ -682,4 +690,82 @@ void EndCuda()
     {
         fprintf(stderr, "cudaDeviceReset failed!");
     }
+}
+
+std::vector<MultivariateCoordinate> read_mock_csv(const char *filepath, int *num_of_rows)
+{
+    io::CSVReader<5> in(filepath);
+    in.read_header(io::ignore_extra_column, "name", "points", "skill", "assists", "salary");
+    std::string name, skill;
+    double points, assists, salary;
+    std::vector<MultivariateCoordinate> coord;
+
+    if (num_of_rows == nullptr)
+        // read all rows
+        while (in.read_row(name, points, skill, assists, salary))
+            coord.push_back(MultivariateCoordinate(points, assists, salary));
+    else
+        // read specified number of rows
+        for (int i = 0; i < *num_of_rows; i++)
+        {
+            in.read_row(name, points, skill, assists, salary);
+            coord.push_back(MultivariateCoordinate(points, assists, salary));
+        }
+
+    return coord;
+}
+
+double PredictY(std::array<double, 2> Xs, double b1, double b2, double a)
+{
+    return (Xs[0] * b1) + (Xs[1] * b2) - a;
+}
+
+int main(int argc, char **argv)
+{
+    int num_of_rows = -1;
+
+    // Check for user arguments
+    if (argc != 2 && argc != 1)
+    {
+        fprintf(stderr, "Usage: ./cuda [num_of_rows]\n");
+        return 1;
+    }
+
+    if (argv[1] != nullptr)
+        num_of_rows = std::stoi(argv[1]);
+
+    std::vector<MultivariateCoordinate> data = read_mock_csv("dataset/mock.csv", num_of_rows == -1 ? nullptr : &num_of_rows);
+
+    // print how many coordinates in red
+    std::cout << "\033[1;31m[DEBUG] " << data.size() << " coordinate is loaded\033[0m" << std::endl;
+
+    double b1 = 0.0, b2 = 0.0, a = 0.0;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::forward_as_tuple(std::tie(b1, b2), a) = CalculateGradientAndYIntercept(data);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = end - start;
+
+    const char *operation_name = "InitModel";
+    float ms = duration.count() * 1000.0f;
+    const char *to_print = operation_name == nullptr ? "An unknown operation" : operation_name;
+    std::cout << "\033[1;31m[TIMER] " << to_print << " took " << ms << "ms\033[0m\n";
+
+    // print the straight line formula
+    std::cout << "\nThe following is the calculated formula of straight line: " << std::endl;
+    std::cout << "y = " + std::to_string(b1) + "x₁ + " + std::to_string(b2) + "x₂ + " + std::to_string(a) << std::endl;
+
+    // get user input
+    std::array<double, 2> Xs;
+    std::cout << "\nEnter the X values separated by space, for example: 32.3 8.9" << std::endl;
+    std::cin >> Xs[0] >> Xs[1];
+
+    // calculate the predicted Y value and print it
+    double predicted = PredictY(Xs, b1, b2, a);
+    std::cout << std::fixed << std::setprecision(4);
+    std::cout << "\nThe predicted Y value is " << predicted << " (4 d.p.)" << std::endl;
+
+    EndCuda();
 }

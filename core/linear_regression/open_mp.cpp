@@ -46,21 +46,23 @@ namespace DSPC::LinearRegression::OpenMP
     std::vector<double> result;
     double sum_of_x1, sum_of_x2, sum_of_y, sum_of_squares_x1, sum_of_squares_x2;
     omp_set_nested(2);
-#pragma omp parallel num_threads(16)
+#pragma omp parallel num_threads(8)
     {
-      if (omp_get_thread_num() < 5)
+      if (omp_get_thread_num() < 3)
       {
         //  Task 0
         sum_of_x1 = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                     { return pv + c.xs[0]; });
       }
-      else if (omp_get_thread_num() >= 5 && omp_get_thread_num() < 11)
+      else if (omp_get_thread_num() >= 3 && omp_get_thread_num() < 6)
+      // else if (omp_get_thread_num() == 1)
       {
         //  Task 1
         sum_of_x2 = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                     { return pv + c.xs[1]; });
       }
-      else if (omp_get_thread_num() >= 11 && omp_get_thread_num() < 16)
+      else if (omp_get_thread_num() >= 6 && omp_get_thread_num() < 8)
+      // else if (omp_get_thread_num() == 2)
       {
         //  Task 2
         sum_of_y = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
@@ -77,9 +79,9 @@ namespace DSPC::LinearRegression::OpenMP
     double mean_x2 = sum_of_x2 / n;
     double mean_y = sum_of_y / n;
 
-#pragma omp parallel num_threads(16)
+#pragma omp parallel num_threads(8)
     {
-      if (omp_get_thread_num() < 8)
+      if (omp_get_thread_num() < 4)
       {
         //  Task 3
         sum_of_squares_x1 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
@@ -118,6 +120,5 @@ namespace DSPC::LinearRegression::OpenMP
     double a = mean_y - (b1 * mean_x1) - (b2 * mean_x2);
 
     return std::make_tuple(std::make_pair(b1, b2), a);
-    // return std::make_tuple(std::make_pair(0, 0), 0);
   }
 }
