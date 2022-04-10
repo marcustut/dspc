@@ -47,6 +47,7 @@ namespace DSPC::LinearRegression::OpenMP
     int n = mc.size();
     std::vector<double> result;
     double sum_of_x1, sum_of_x2, sum_of_y, sum_of_squares_x1, sum_of_squares_x2;
+    omp_set_nested(2);
 #pragma omp parallel num_threads(16)
     {
       if (omp_get_thread_num() < 5)

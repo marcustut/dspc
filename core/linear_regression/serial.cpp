@@ -3,6 +3,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace DSPC::LinearRegression::Serial
 {
@@ -40,7 +41,6 @@ namespace DSPC::LinearRegression::Serial
     {
         // num of coordinate
         int n = mc.size();
-        std::vector<double> result;
 
         double sum_of_x1 = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                            { return pv + c.xs[0]; });
@@ -48,7 +48,6 @@ namespace DSPC::LinearRegression::Serial
                                            { return pv + c.xs[1]; });
         double sum_of_y = std::accumulate(mc.begin(), mc.end(), 0.0, [](double pv, MultivariateCoordinate c)
                                           { return pv + c.y; });
-
         double mean_x1 = sum_of_x1 / n;
         double mean_x2 = sum_of_x2 / n;
         double mean_y = sum_of_y / n;
@@ -57,24 +56,12 @@ namespace DSPC::LinearRegression::Serial
                                                    { return pv + std::pow(c.xs[0] - mean_x1, 2); });
         double sum_of_squares_x2 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
                                                    { return pv + std::pow(c.xs[1] - mean_x2, 2); });
-
-        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                       { return (a.xs[0] - mean_x1) * (b.y - mean_y); });
-        double sum_of_products_x1_y = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                                                      { return pv + val; });
-        result.clear();
-
-        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                       { return (a.xs[1] - mean_x2) * (b.y - mean_y); });
-        double sum_of_products_x2_y = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                                                      { return pv + val; });
-        result.clear();
-
-        std::transform(mc.begin(), mc.end(), mc.begin(), std::back_inserter(result), [&](MultivariateCoordinate a, MultivariateCoordinate b)
-                       { return (a.xs[0] - mean_x1) * (b.xs[1] - mean_x2); });
-        double sum_of_products_x1_x2 = std::accumulate(result.begin(), result.end(), 0.0, [&](double pv, double val)
-                                                       { return pv + val; });
-        result.clear();
+        double sum_of_products_x1_y = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                                                      { return pv + (c.xs[0] - mean_x1) * (c.y - mean_y); });
+        double sum_of_products_x2_y = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                                                      { return pv + (c.xs[1] - mean_x2) * (c.y - mean_y); });
+        double sum_of_products_x1_x2 = std::accumulate(mc.begin(), mc.end(), 0.0, [&](double pv, MultivariateCoordinate c)
+                                                       { return pv + (c.xs[0] - mean_x1) * (c.xs[1] - mean_x2); });
 
         double b1 = (sum_of_products_x1_y * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x2_y) / (sum_of_squares_x1 * sum_of_squares_x2 - sum_of_products_x1_x2 * sum_of_products_x1_x2);
 
