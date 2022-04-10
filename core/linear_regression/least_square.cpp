@@ -152,6 +152,6 @@ namespace DSPC::LinearRegression
     if (this->type == Type::Normal)
       return "y = " + std::to_string(this->m) + "x + " + std::to_string(this->c);
     else
-      return "y = " + std::to_string(this->b1) + "x₁ + " + std::to_string(this->b2) + "x₂ + " + std::to_string(this->a);
+      return "y = " + std::to_string(this->b1) + "x1 + " + std::to_string(this->b2) + "x2 + " + std::to_string(this->a);
   }
 } // namespace DSPC

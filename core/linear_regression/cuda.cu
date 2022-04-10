@@ -755,7 +755,7 @@ int main(int argc, char **argv)
 
     // print the straight line formula
     std::cout << "\nThe following is the calculated formula of straight line: " << std::endl;
-    std::cout << "y = " + std::to_string(b1) + "x₁ + " + std::to_string(b2) + "x₂ + " + std::to_string(a) << std::endl;
+    std::cout << "y = " + std::to_string(b1) + "x1 + " + std::to_string(b2) + "x2 + " + std::to_string(a) << std::endl;
 
     // get user input
     std::array<double, 2> Xs;

@@ -69,12 +69,6 @@ ifeq ($(OS), Windows_NT) #WINDOWS
 	CFLAGS = $(CXXFLAGS)
 endif
 
-NVCC_RESULT := $(shell which nvcc 2> NULL)
-NVCC_TEST := $(notdir $(NVCC_RESULT))
-ifeq ($(NVCC_TEST),Program NVIDIA GPU Computing nvcc)
-	OBJS += cuda.o
-endif
-
 ##---------------------------------------------------------------------
 ## BUILD RULES
 ##---------------------------------------------------------------------
