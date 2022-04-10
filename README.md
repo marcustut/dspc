@@ -1,39 +1,32 @@
-# dspc
+# DSPC
 
-hi
+## User Manual
 
-# x1
+### NOT CUDA
+1. Click on the `main.exe` to run this parallelisation program (except `CUDA`).
 
-7
-6
-8
-9
-14
-19
+2. Usage:
+    ```
+    main <TYPE> <TECHNIQUE> <DATASET> [NUMBER_OF_ROWS]
+    ```
+    Field | Description
+    --- | ---
+    TYPE | Type of application to open, specify either _GUI_ or _CLI_
+    TECHNIQUE | Type of technique to perform the algorithm, specify one of *Serial*, *OpenMP*, *Pthread*, *CppStdLib*
+    DATASET | Relative path to dataset (.csv file). The default `mock.csv` is provided in this repo.
+    NUM_OF_ROWS | Number of rows in the data to be loaded, default `160000`.
 
-# x2
+3. Enter `2` values of _X_ value to predict salary in 4 d.p.
 
-8
-6
-9
-8
-13
-18
+### CUDA
+1. Click on the `cuda.exe` to run CUDA parallelisation program.
 
-# x3
+2. Usage:
+   ```
+    CUDA <NUM_OF_ROWS>
+    ```
+    Field | Description
+    --- | ---
+    NUM_OF_ROWS | Number of rows in the data to be loaded, `CANNOT` exceed 110000
 
-7
-8
-10
-7
-15
-17
-
-# y
-
-1000
-1789
-2000
-2400
-3800
-4000
+3. Enter `2` values of _X_ value to predict salary in 4 d.p.
